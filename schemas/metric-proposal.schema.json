@@ -1,0 +1,109 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "anti_gaming_tests": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Anti Gaming Tests",
+      "type": "array"
+    },
+    "baseline_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Baseline Ids",
+      "type": "array"
+    },
+    "complexity_cost": {
+      "minimum": 0,
+      "title": "Complexity Cost",
+      "type": "number"
+    },
+    "consequence": {
+      "title": "Consequence",
+      "type": "string"
+    },
+    "content_id": {
+      "readOnly": true,
+      "title": "Content Id",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "dimension": {
+      "title": "Dimension",
+      "type": "string"
+    },
+    "expiration_conditions": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Expiration Conditions",
+      "type": "array"
+    },
+    "falsifiers": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Falsifiers",
+      "type": "array"
+    },
+    "invariances": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Invariances",
+      "type": "array"
+    },
+    "measurement_procedure": {
+      "title": "Measurement Procedure",
+      "type": "string"
+    },
+    "ordering": {
+      "title": "Ordering",
+      "type": "string"
+    },
+    "parents": {
+      "default": [],
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "title": "Parents",
+      "type": "array"
+    },
+    "schema_version": {
+      "default": "0.1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "validity_region": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Validity Region",
+      "type": "array"
+    }
+  },
+  "required": [
+    "created_at",
+    "dimension",
+    "measurement_procedure",
+    "ordering",
+    "baseline_ids",
+    "consequence",
+    "falsifiers",
+    "anti_gaming_tests",
+    "complexity_cost",
+    "expiration_conditions",
+    "content_id"
+  ],
+  "title": "MetricProposal",
+  "type": "object"
+}

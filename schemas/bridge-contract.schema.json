@@ -1,0 +1,132 @@
+{
+  "$defs": {
+    "GroundingClass": {
+      "enum": [
+        "G-U",
+        "G-S",
+        "G-D",
+        "G-C",
+        "G-P",
+        "G-PR"
+      ],
+      "title": "GroundingClass",
+      "type": "string"
+    },
+    "RealityTier": {
+      "enum": [
+        "physical",
+        "digital-twin",
+        "simulated",
+        "formal",
+        "hypothetical"
+      ],
+      "title": "RealityTier",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "approved_instruments": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Approved Instruments",
+      "type": "array"
+    },
+    "authority_id": {
+      "title": "Authority Id",
+      "type": "string"
+    },
+    "authorization_boundary": {
+      "title": "Authorization Boundary",
+      "type": "string"
+    },
+    "content_id": {
+      "readOnly": true,
+      "title": "Content Id",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "observable_consequences": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Observable Consequences",
+      "type": "array"
+    },
+    "parents": {
+      "default": [],
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "title": "Parents",
+      "type": "array"
+    },
+    "permitted_status_claims": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/GroundingClass"
+      },
+      "title": "Permitted Status Claims",
+      "type": "array"
+    },
+    "protected_boundaries": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Protected Boundaries",
+      "type": "array"
+    },
+    "reality_tier": {
+      "$ref": "#/$defs/RealityTier"
+    },
+    "resource_envelope": {
+      "default": [],
+      "items": {
+        "maxItems": 2,
+        "minItems": 2,
+        "prefixItems": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          }
+        ],
+        "type": "array"
+      },
+      "title": "Resource Envelope",
+      "type": "array"
+    },
+    "schema_version": {
+      "default": "0.1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "validity_region": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Validity Region",
+      "type": "array"
+    }
+  },
+  "required": [
+    "created_at",
+    "reality_tier",
+    "authority_id",
+    "authorization_boundary",
+    "content_id"
+  ],
+  "title": "BridgeContract",
+  "type": "object"
+}

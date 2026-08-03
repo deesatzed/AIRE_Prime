@@ -12,7 +12,9 @@ from pydantic import BaseModel
 
 def _normalize(value: Any) -> Any:
     if isinstance(value, BaseModel):
-        return _normalize(value.model_dump(mode="python", exclude_none=True))
+        return _normalize(
+            value.model_dump(mode="python", exclude_none=True, exclude_computed_fields=True)
+        )
     if isinstance(value, Enum):
         return _normalize(value.value)
     if isinstance(value, (datetime, date, time)):
