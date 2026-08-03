@@ -1,0 +1,1 @@
+"""Generative Reality Calculus kernel."""
