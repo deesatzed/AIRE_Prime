@@ -13,18 +13,24 @@ The governing methodology and boundaries are defined in the
 
 ## Current implementation status
 
-Tasks 1--4 are implemented on `feature/aire-v0.1`:
+Tasks 1--7 have implementations on `feature/aire-v0.1`:
 
 - reproducible Python research scaffold and explicit claim boundaries;
 - canonical serialization, content-addressed identity, and deeply immutable models;
 - the minimal Generative Reality Calculus structural-type and hypergraph kernel;
 - seven immutable AIRE proposal, contract, and report objects with deterministic JSON Schemas.
+- an allow-listed bounded GRO realizer and realization receipts;
+- an append-only, tamper-evident evidence registry; and
+- typed isolated-role packets plus a fixed, attested trusted-command subprocess boundary.
 
-The verified baseline is 45 passing tests plus Ruff, strict mypy, and schema-freshness checks.
-This establishes an auditable representation and evidence substrate. It does **not** yet establish
-capability transfer, an alien AI sense, QEC improvement, superintelligence, or new physics.
+The recovered and hardened branch has 168 passing tests plus Ruff, strict mypy, and
+schema-freshness checks. This establishes an auditable representation and evidence substrate. It
+does **not** yet satisfy the Tasks 5--7 completion goal: the subprocess boundary is not an OS
+sandbox and does not block filesystem or network syscalls by the approved child. It also does not
+establish capability transfer, an alien AI sense, QEC improvement, superintelligence, or new
+physics.
 
-The next bounded implementation group is Tasks 5--7: safe realization, append-only evidence, and
-isolated agent roles. See [GOAL_NEXT_TASKS_GROUP.md](GOAL_NEXT_TASKS_GROUP.md). The complete status,
-value assessment, and experimental roadmap are documented in
+The current work remains Task 7 security remediation under
+[GOAL_NEXT_TASKS_GROUP.md](GOAL_NEXT_TASKS_GROUP.md). Do not begin E1 or E2. The complete status,
+review findings, and experimental roadmap are documented in
 [AIRE v0.1 Status and Roadmap](docs/AIRE_V0_1_STATUS_AND_ROADMAP.md).

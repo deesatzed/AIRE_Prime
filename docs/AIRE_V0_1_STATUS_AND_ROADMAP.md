@@ -1,16 +1,21 @@
 # AIRE v0.1 Status and Roadmap
 
-**Status date:** 2026-08-04
+**Status date:** 2026-08-06
 
 **Implementation branch:** `feature/aire-v0.1`
 
-**Reviewed implementation baseline:** `9498c4c`
+**Reviewed implementation baseline:** `babd013`
 
 ## Evidence boundary
 
-Tasks 1--4 provide a deterministic, typed, content-addressed substrate for representing and
-evaluating AI-native reality objects. The verified baseline is 45 passing tests plus Ruff, strict
-mypy, deterministic JSON Schema export, and clean diff checks.
+Tasks 1--7 now have deterministic, typed implementations for object representation, bounded GRO
+realization, append-only evidence, and isolated-role exchange. Fresh recovery verification produced
+168 passing tests plus Ruff, strict mypy, deterministic JSON Schema export, and clean diff checks.
+
+The Tasks 5--7 goal is still **blocked**. The Task 7 subprocess adapter enforces a fixed attested
+command, minimal environment, no-fork child limit, bounded I/O, timeout, process-group termination,
+reference-only wire packets, and typed failures. It is not an OS sandbox: the approved child can
+still issue filesystem and network syscalls. See `REVIEW.md` and `DECISIONS.md`.
 
 This is infrastructure evidence, not experimental evidence. It does not demonstrate:
 
@@ -59,7 +64,7 @@ authority boundaries, resource measurements, replication evidence, and verified 
 The proposer can suggest a sense or metric but cannot self-certify its occurrence, improvement, or
 grounding.
 
-## Remaining task groups and the question each answers
+## Tasks 5--7 implementation and gate status
 
 ### Substrate completion -- Tasks 5--7
 
@@ -81,6 +86,28 @@ grounding.
 
 These tasks should tell us whether AIRE is safe and auditable enough to begin experiments. They do
 not themselves prove capability or sense transfer.
+
+Task 5 is committed at `8777470`, Task 6 at `7764155`, the initial Task 7 implementation at
+`13cd8fa`, and recovered Task 7 hardening at `babd013`. Automated specification and quality checks
+are green, but the independent security gate remains red because host filesystem/network
+containment and the residual verify-to-exec race are unresolved.
+
+## Recovery verification evidence
+
+On 2026-08-06, from the durable feature worktree:
+
+- focused Task 7 tests: 36 passed;
+- full suite: 168 passed;
+- Ruff: passed;
+- strict mypy: passed across 25 source files;
+- deterministic schema check: passed;
+- diff check: passed.
+
+The original four local-only commits were backed up to GitHub before reconstruction. The recovered
+test patch was observed RED before implementation was replayed. No test was skipped, weakened, or
+deleted to obtain the green result.
+
+These are infrastructure checks only. E1 and E2 have not been implemented or demonstrated.
 
 ### Experimental proof -- Tasks 8--10
 
@@ -124,6 +151,7 @@ would remain simulator-level.
 
 ## Current next action
 
-Execute the bounded Tasks 5--7 completion contract in
-[`GOAL_NEXT_TASKS_GROUP.md`](../GOAL_NEXT_TASKS_GROUP.md). Do not begin E1 or E2 until all three
-substrate tasks pass their own specification, security, and code-quality reviews.
+Complete Task 7 host containment and eliminate or explicitly accept the remaining verify-to-exec
+and `preexec_fn` risks under [`GOAL_NEXT_TASKS_GROUP.md`](../GOAL_NEXT_TASKS_GROUP.md). Repeat the
+independent security review and full verification afterward. Do not begin E1 or E2 until the
+Tasks 5--7 security gate passes.
