@@ -1,3 +1,4 @@
+import re
 from enum import StrEnum
 from typing import Self
 
@@ -21,9 +22,11 @@ class AgentIdentity(FrozenModel):
 
     @field_validator("agent_id")
     @classmethod
-    def require_nonblank_id(cls, value: str) -> str:
-        if not value.strip():
-            raise ValueError("agent identity must be nonblank")
+    def require_canonical_id(cls, value: str) -> str:
+        if re.fullmatch(r"[a-z][a-z0-9._:-]{0,63}", value) is None:
+            raise ValueError(
+                "agent identity must be a canonical lower-case machine identifier"
+            )
         return value
 
 

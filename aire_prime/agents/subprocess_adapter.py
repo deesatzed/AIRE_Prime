@@ -1,12 +1,18 @@
+import hashlib
+import math
 import os
+import resource
 import selectors
 import signal
+import stat
 import subprocess
 from contextlib import suppress
 from dataclasses import dataclass, field
 from pathlib import Path
 from time import monotonic
 from typing import Any
+
+from pydantic import field_validator, model_validator
 
 from aire_prime.agents.protocol import (
     AgentRequest,
@@ -15,11 +21,152 @@ from aire_prime.agents.protocol import (
     ProtocolFailure,
     ProtocolFailureCode,
 )
+from aire_prime.core.canonical import content_id
+from aire_prime.core.model import FrozenModel
+from aire_prime.objects import ContentID
 
 SAFE_ENVIRONMENT_KEYS = frozenset({"LANG", "LC_ALL", "TZ"})
 FILE_ACCESS_FIELDS = frozenset(
     {"file_access", "file_access_request", "file_access_requests", "path_request"}
 )
+MAX_DIAGNOSTIC_COUNTEREXAMPLE_CHARS = 128
+
+
+class CommandArtifact(FrozenModel):
+    """A file dependency bound to the exact bytes approved by the caller."""
+
+    path: str
+    resolved_path: str
+    digest: ContentID
+    device: int
+    inode: int
+    size: int
+
+
+class FailureDiagnostic(FrozenModel):
+    """Local-only narrative detail that never enters scored protocol bytes."""
+
+    code: ProtocolFailureCode
+    message: str
+    counterexample: str | None = None
+
+    @field_validator("message")
+    @classmethod
+    def require_message(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("failure diagnostic message must be nonblank")
+        return value
+
+
+class TrustedCommand(FrozenModel):
+    """A fixed command whose executable and absolute file arguments are attested.
+
+    This is an explicit trusted-computing-base boundary, not a claim that an
+    arbitrary executable is made safe by the adapter.
+    """
+
+    argv: tuple[str, ...]
+    artifacts: tuple[CommandArtifact, ...]
+
+    @field_validator("argv")
+    @classmethod
+    def require_fixed_absolute_command(cls, value: tuple[str, ...]) -> tuple[str, ...]:
+        if not value or any(not part or "\0" in part for part in value):
+            raise ValueError("trusted command must be a nonempty argument array")
+        if not Path(value[0]).is_absolute():
+            raise ValueError("trusted command executable must be an absolute path")
+        return value
+
+    @field_validator("artifacts")
+    @classmethod
+    def normalize_artifacts(
+        cls, value: tuple[CommandArtifact, ...]
+    ) -> tuple[CommandArtifact, ...]:
+        paths = [artifact.path for artifact in value]
+        if len(paths) != len(set(paths)):
+            raise ValueError("trusted command artifact paths must be unique")
+        return tuple(sorted(value, key=lambda artifact: artifact.path))
+
+    @model_validator(mode="after")
+    def require_complete_attestation(self) -> "TrustedCommand":
+        required_paths = {argument for argument in self.argv if Path(argument).is_absolute()}
+        artifact_paths = {artifact.path for artifact in self.artifacts}
+        if self.argv[0] not in artifact_paths:
+            raise ValueError("trusted command executable must have an artifact attestation")
+        if artifact_paths != required_paths:
+            if not required_paths <= artifact_paths:
+                raise ValueError("trusted command must attest every absolute file argument")
+            raise ValueError("trusted command artifacts must exactly match absolute file arguments")
+        return self
+
+    @staticmethod
+    def _inspect(path: Path) -> tuple[Path, ContentID, os.stat_result]:
+        resolved = path.resolve(strict=True)
+        digest = hashlib.sha256()
+        with resolved.open("rb") as stream:
+            file_stat = os.fstat(stream.fileno())
+            if not stat.S_ISREG(file_stat.st_mode):
+                raise ValueError(f"trusted command artifact is not a file: {path}")
+            for chunk in iter(lambda: stream.read(1_048_576), b""):
+                digest.update(chunk)
+        return resolved, f"sha256:{digest.hexdigest()}", file_stat
+
+    @classmethod
+    def attest(cls, argv: tuple[str, ...]) -> "TrustedCommand":
+        if not argv or any(not part or "\0" in part for part in argv):
+            raise ValueError("trusted command must be a nonempty argument array")
+        if not Path(argv[0]).is_absolute():
+            raise ValueError("trusted command executable must be an absolute path")
+        artifacts: list[CommandArtifact] = []
+        for argument in argv:
+            path = Path(argument)
+            if not path.is_absolute():
+                continue
+            try:
+                resolved, digest, file_stat = cls._inspect(path)
+            except OSError as error:
+                raise ValueError(f"trusted command artifact does not exist: {argument}") from error
+            artifacts.append(
+                CommandArtifact(
+                    path=argument,
+                    resolved_path=str(resolved),
+                    digest=digest,
+                    device=file_stat.st_dev,
+                    inode=file_stat.st_ino,
+                    size=file_stat.st_size,
+                )
+            )
+        return cls(argv=argv, artifacts=tuple(artifacts))
+
+    def verify(self) -> bool:
+        for artifact in self.artifacts:
+            try:
+                resolved, digest, file_stat = self._inspect(Path(artifact.path))
+                if str(resolved) != artifact.resolved_path:
+                    return False
+                if (
+                    digest != artifact.digest
+                    or file_stat.st_dev != artifact.device
+                    or file_stat.st_ino != artifact.inode
+                    or file_stat.st_size != artifact.size
+                ):
+                    return False
+            except (OSError, ValueError):
+                return False
+        return True
+
+    def execution_argv(self) -> tuple[str, ...]:
+        resolved_by_path = {
+            artifact.path: artifact.resolved_path for artifact in self.artifacts
+        }
+        return tuple(resolved_by_path.get(argument, argument) for argument in self.argv)
+
+
+def _apply_child_limits() -> None:
+    """Apply limits in the child after Popen forks and before it execs."""
+
+    resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
+    resource.setrlimit(resource.RLIMIT_NPROC, (0, 0))
 
 
 @dataclass
@@ -39,33 +186,53 @@ class SubprocessAdapter:
     def __init__(
         self,
         *,
-        command: tuple[str, ...],
+        trusted_command: TrustedCommand,
         working_directory: Path,
         timeout_seconds: float = 30.0,
         max_output_bytes: int = 1_000_000,
         max_input_bytes: int = 1_000_000,
         environment_allowlist: tuple[str, ...] = ("LANG", "LC_ALL", "TZ"),
     ) -> None:
-        if not command or any(not part for part in command):
-            raise ValueError("subprocess command must be a nonempty argument array")
-        if not Path(command[0]).is_absolute():
-            raise ValueError("subprocess command executable must be an absolute path")
         if not working_directory.is_dir():
             raise ValueError("subprocess working directory must exist")
-        if timeout_seconds <= 0:
-            raise ValueError("subprocess timeout must be positive")
-        if max_output_bytes <= 0 or max_input_bytes <= 0:
+        if (
+            isinstance(timeout_seconds, bool)
+            or not isinstance(timeout_seconds, (int, float))
+            or not math.isfinite(timeout_seconds)
+            or timeout_seconds <= 0
+        ):
+            raise ValueError("subprocess timeout must be a finite positive number")
+        if (
+            isinstance(max_output_bytes, bool)
+            or isinstance(max_input_bytes, bool)
+            or not isinstance(max_output_bytes, int)
+            or not isinstance(max_input_bytes, int)
+            or max_output_bytes <= 0
+            or max_input_bytes <= 0
+        ):
             raise ValueError("subprocess input and output bounds must be positive")
         if not set(environment_allowlist) <= SAFE_ENVIRONMENT_KEYS:
             raise ValueError("subprocess environment allowlist contains an unsafe key")
-        self._command = command
+        self._trusted_command = trusted_command
         self._working_directory = working_directory.resolve()
         self._timeout_seconds = timeout_seconds
         self._max_output_bytes = max_output_bytes
         self._max_input_bytes = max_input_bytes
         self._environment_allowlist = tuple(sorted(set(environment_allowlist)))
+        self._diagnostics: list[FailureDiagnostic] = []
+
+    @property
+    def diagnostics(self) -> tuple[FailureDiagnostic, ...]:
+        return tuple(self._diagnostics)
 
     def run(self, request: AgentRequest) -> AgentResponse:
+        self._diagnostics.clear()
+        if not self._trusted_command.verify():
+            return self._failure(
+                request,
+                ProtocolFailureCode.EXECUTION_ERROR,
+                "trusted command artifact verification failed",
+            )
         input_bytes = request.to_jsonl()
         if len(input_bytes) > self._max_input_bytes:
             return self._failure(
@@ -81,16 +248,18 @@ class SubprocessAdapter:
         }
         try:
             process = subprocess.Popen(
-                list(self._command),
+                list(self._trusted_command.execution_argv()),
                 shell=False,
                 cwd=self._working_directory,
                 env=environment,
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
+                close_fds=True,
                 start_new_session=True,
+                preexec_fn=_apply_child_limits,
             )
-        except OSError as error:
+        except (OSError, subprocess.SubprocessError) as error:
             return self._failure(
                 request,
                 ProtocolFailureCode.EXECUTION_ERROR,
@@ -264,13 +433,29 @@ class SubprocessAdapter:
             with suppress(OSError, ValueError):
                 close()
 
-    @staticmethod
     def _failure(
+        self,
         request: AgentRequest,
         code: ProtocolFailureCode,
         message: str,
         counterexample: str | None = None,
     ) -> AgentResponse:
+        # Raw diagnostic narratives are intentionally excluded from scored wire
+        # bytes. A child-controlled counterexample must not become a covert
+        # channel through an otherwise opaque content hash.
+        detail_content_id = content_id({"failure_code": code.value})
+        bounded_counterexample = (
+            None
+            if counterexample is None
+            else counterexample[:MAX_DIAGNOSTIC_COUNTEREXAMPLE_CHARS]
+        )
+        self._diagnostics.append(
+            FailureDiagnostic(
+                code=code,
+                message=message,
+                counterexample=bounded_counterexample,
+            )
+        )
         return AgentResponse(
             message_kind=MessageKind.FAILURE,
             request_content_id=request.content_id,
@@ -280,8 +465,7 @@ class SubprocessAdapter:
             failures=(
                 ProtocolFailure(
                     code=code,
-                    message=message,
-                    counterexample=counterexample,
+                    detail_content_id=detail_content_id,
                 ),
             ),
         )

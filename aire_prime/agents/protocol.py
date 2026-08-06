@@ -1,4 +1,5 @@
 import json
+import re
 from enum import StrEnum
 from typing import Any, Self
 
@@ -7,7 +8,6 @@ from pydantic import computed_field, field_validator, model_validator
 from aire_prime.agents.roles import AgentIdentity, Role
 from aire_prime.core.canonical import canonical_bytes, content_id
 from aire_prime.core.model import FrozenModel
-from aire_prime.exchange.receipt import RealizationReceipt
 from aire_prime.objects import ContentID
 
 
@@ -34,15 +34,7 @@ class ProtocolFailureCode(StrEnum):
 
 class ProtocolFailure(FrozenModel):
     code: ProtocolFailureCode
-    message: str
-    counterexample: str | None = None
-
-    @field_validator("message")
-    @classmethod
-    def require_message(cls, value: str) -> str:
-        if not value.strip():
-            raise ValueError("protocol failure message must be nonblank")
-        return value
+    detail_content_id: ContentID | None = None
 
 
 class DeclaredInput(FrozenModel):
@@ -52,8 +44,8 @@ class DeclaredInput(FrozenModel):
     @field_validator("name")
     @classmethod
     def require_name(cls, value: str) -> str:
-        if not value.strip():
-            raise ValueError("declared input name must be nonblank")
+        if re.fullmatch(r"[a-z][a-z0-9_.-]{0,63}", value) is None:
+            raise ValueError("declared input name must be a bounded machine identifier")
         return value
 
 
@@ -117,14 +109,14 @@ class AgentRequest(ProtocolEnvelope):
     object_ids: tuple[ContentID, ...] = ()
     content_ids: tuple[ContentID, ...] = ()
     declared_inputs: tuple[DeclaredInput, ...] = ()
-    receipts: tuple[RealizationReceipt, ...] = ()
+    receipt_content_ids: tuple[ContentID, ...] = ()
 
     @field_validator("object_ids")
     @classmethod
     def normalize_object_ids(cls, value: tuple[str, ...]) -> tuple[str, ...]:
         return _normalize_content_ids(value, name="object_ids")
 
-    @field_validator("content_ids")
+    @field_validator("content_ids", "receipt_content_ids")
     @classmethod
     def normalize_content_references(cls, value: tuple[str, ...]) -> tuple[str, ...]:
         return _normalize_content_ids(value, name="content_ids")
@@ -163,7 +155,7 @@ class AgentResponse(ProtocolEnvelope):
     receiver: AgentIdentity
     object_ids: tuple[ContentID, ...] = ()
     content_ids: tuple[ContentID, ...] = ()
-    receipts: tuple[RealizationReceipt, ...] = ()
+    receipt_content_ids: tuple[ContentID, ...] = ()
     failures: tuple[ProtocolFailure, ...] = ()
 
     @field_validator("object_ids")
@@ -171,7 +163,7 @@ class AgentResponse(ProtocolEnvelope):
     def normalize_object_ids(cls, value: tuple[str, ...]) -> tuple[str, ...]:
         return _normalize_content_ids(value, name="object_ids")
 
-    @field_validator("content_ids")
+    @field_validator("content_ids", "receipt_content_ids")
     @classmethod
     def normalize_content_references(cls, value: tuple[str, ...]) -> tuple[str, ...]:
         return _normalize_content_ids(value, name="content_ids")
@@ -184,6 +176,8 @@ class AgentResponse(ProtocolEnvelope):
             raise ValueError("failure response requires failures")
         if self.message_kind not in {MessageKind.RESPONSE, MessageKind.FAILURE}:
             raise ValueError("response uses a non-response message kind")
+        if self.sender.agent_id == self.receiver.agent_id:
+            raise ValueError("response sender and receiver identities must be independent")
         return self
 
 
