@@ -1,0 +1,196 @@
+{
+  "$defs": {
+    "GroundingClass": {
+      "enum": [
+        "G-U",
+        "G-S",
+        "G-D",
+        "G-C",
+        "G-P",
+        "G-PR"
+      ],
+      "title": "GroundingClass",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "adversarial_results": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Adversarial Results",
+      "type": "array"
+    },
+    "baseline_results": {
+      "items": {
+        "maxItems": 2,
+        "minItems": 2,
+        "prefixItems": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          }
+        ],
+        "type": "array"
+      },
+      "title": "Baseline Results",
+      "type": "array"
+    },
+    "claimed_grounding": {
+      "$ref": "#/$defs/GroundingClass"
+    },
+    "content_id": {
+      "readOnly": true,
+      "title": "Content Id",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "evaluation_contract_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Evaluation Contract Id",
+      "type": "string"
+    },
+    "evidence_attachments": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Evidence Attachments",
+      "type": "array"
+    },
+    "expiration_conditions": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Expiration Conditions",
+      "type": "array"
+    },
+    "improvement_vector": {
+      "items": {
+        "maxItems": 2,
+        "minItems": 2,
+        "prefixItems": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          }
+        ],
+        "type": "array"
+      },
+      "title": "Improvement Vector",
+      "type": "array"
+    },
+    "known_failures": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Known Failures",
+      "type": "array"
+    },
+    "metric_proposal_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Metric Proposal Id",
+      "type": "string"
+    },
+    "occurrence_report_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Occurrence Report Id",
+      "type": "string"
+    },
+    "parents": {
+      "default": [],
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "title": "Parents",
+      "type": "array"
+    },
+    "protected_effects": {
+      "default": [],
+      "items": {
+        "maxItems": 2,
+        "minItems": 2,
+        "prefixItems": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          }
+        ],
+        "type": "array"
+      },
+      "title": "Protected Effects",
+      "type": "array"
+    },
+    "replications": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Replications",
+      "type": "array"
+    },
+    "resource_measurements": {
+      "items": {
+        "maxItems": 2,
+        "minItems": 2,
+        "prefixItems": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          }
+        ],
+        "type": "array"
+      },
+      "title": "Resource Measurements",
+      "type": "array"
+    },
+    "schema_version": {
+      "default": "0.1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "validator_id": {
+      "title": "Validator Id",
+      "type": "string"
+    },
+    "validity_region": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Validity Region",
+      "type": "array"
+    }
+  },
+  "required": [
+    "created_at",
+    "metric_proposal_id",
+    "evaluation_contract_id",
+    "occurrence_report_id",
+    "validator_id",
+    "claimed_grounding",
+    "improvement_vector",
+    "baseline_results",
+    "resource_measurements",
+    "content_id"
+  ],
+  "title": "ImprovementReport",
+  "type": "object"
+}

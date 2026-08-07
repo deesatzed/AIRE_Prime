@@ -10,6 +10,26 @@
 
 ---
 
+## Execution status -- 2026-08-04
+
+- Tasks 1--4 are implemented and independently reviewed on `feature/aire-v0.1` through commit
+  `9498c4c`.
+- Verified baseline: 45 tests pass; Ruff, strict mypy, deterministic schema export, and
+  `git diff --check` pass.
+- Tasks 1--4 establish the project scaffold, immutable content identity, minimal GRC structural
+  kernel, and seven evidence-gated exchange objects. They do not establish capability transfer or
+  alien-sense occurrence.
+- Tasks 5--7 are the next dependency-ordered implementation group. Their completion contract is
+  [`GOAL_NEXT_TASKS_GROUP.md`](../../GOAL_NEXT_TASKS_GROUP.md).
+- Tasks 8--10 are the experimental proof group. Tasks 11--12 are integration, reproducibility, and
+  adversarial release gates.
+
+See [`docs/AIRE_V0_1_STATUS_AND_ROADMAP.md`](../AIRE_V0_1_STATUS_AND_ROADMAP.md) for the distinction
+between verified implementation, potential value, and the question answered by each remaining
+task.
+
+---
+
 ## Preconditions and boundaries
 
 - Read `docs/plans/2026-08-03-aire-prime-design.md` before implementation.

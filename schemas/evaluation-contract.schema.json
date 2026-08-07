@@ -1,0 +1,111 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "ablations": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Ablations",
+      "type": "array"
+    },
+    "baseline_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Baseline Ids",
+      "type": "array"
+    },
+    "claim": {
+      "title": "Claim",
+      "type": "string"
+    },
+    "content_id": {
+      "readOnly": true,
+      "title": "Content Id",
+      "type": "string"
+    },
+    "controls": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Controls",
+      "type": "array"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "decision_rule": {
+      "title": "Decision Rule",
+      "type": "string"
+    },
+    "hidden_test_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Hidden Test Ids",
+      "type": "array"
+    },
+    "parents": {
+      "default": [],
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "title": "Parents",
+      "type": "array"
+    },
+    "replication_requirements": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Replication Requirements",
+      "type": "array"
+    },
+    "resource_budget": {
+      "default": [],
+      "items": {
+        "maxItems": 2,
+        "minItems": 2,
+        "prefixItems": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          }
+        ],
+        "type": "array"
+      },
+      "title": "Resource Budget",
+      "type": "array"
+    },
+    "schema_version": {
+      "default": "0.1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "validity_region": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Validity Region",
+      "type": "array"
+    }
+  },
+  "required": [
+    "created_at",
+    "claim",
+    "baseline_ids",
+    "hidden_test_ids",
+    "decision_rule",
+    "content_id"
+  ],
+  "title": "EvaluationContract",
+  "type": "object"
+}

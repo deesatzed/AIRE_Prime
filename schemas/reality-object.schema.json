@@ -1,0 +1,189 @@
+{
+  "$defs": {
+    "SpaceKind": {
+      "enum": [
+        "scalar",
+        "vector",
+        "tensor",
+        "distribution",
+        "graph",
+        "manifold",
+        "operator",
+        "process"
+      ],
+      "title": "SpaceKind",
+      "type": "string"
+    },
+    "StructuralType": {
+      "additionalProperties": false,
+      "properties": {
+        "dimensions": {
+          "default": [],
+          "items": {
+            "type": "integer"
+          },
+          "title": "Dimensions",
+          "type": "array"
+        },
+        "domain": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Domain"
+        },
+        "field": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Field"
+        },
+        "kind": {
+          "$ref": "#/$defs/SpaceKind"
+        },
+        "precision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Precision"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Unit"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "title": "StructuralType",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "constructor_id": {
+      "title": "Constructor Id",
+      "type": "string"
+    },
+    "content_id": {
+      "readOnly": true,
+      "title": "Content Id",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "interfaces": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Interfaces",
+      "type": "array"
+    },
+    "invariants": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Invariants",
+      "type": "array"
+    },
+    "parents": {
+      "default": [],
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "title": "Parents",
+      "type": "array"
+    },
+    "resource_requirements": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Resource Requirements",
+      "type": "array"
+    },
+    "schema_version": {
+      "default": "0.1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "state_space": {
+      "$ref": "#/$defs/StructuralType"
+    },
+    "tests": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Tests",
+      "type": "array"
+    },
+    "transformations": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Transformations",
+      "type": "array"
+    },
+    "uncertainty": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Uncertainty"
+    },
+    "validity_region": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Validity Region",
+      "type": "array"
+    }
+  },
+  "required": [
+    "created_at",
+    "state_space",
+    "interfaces",
+    "constructor_id",
+    "content_id"
+  ],
+  "title": "RealityObject",
+  "type": "object"
+}

@@ -1,0 +1,188 @@
+{
+  "$defs": {
+    "EvidenceState": {
+      "additionalProperties": false,
+      "properties": {
+        "grounding": {
+          "$ref": "#/$defs/GroundingClass"
+        },
+        "occurrence": {
+          "$ref": "#/$defs/OccurrenceMaturity"
+        }
+      },
+      "required": [
+        "occurrence",
+        "grounding"
+      ],
+      "title": "EvidenceState",
+      "type": "object"
+    },
+    "GroundingClass": {
+      "enum": [
+        "G-U",
+        "G-S",
+        "G-D",
+        "G-C",
+        "G-P",
+        "G-PR"
+      ],
+      "title": "GroundingClass",
+      "type": "string"
+    },
+    "OccurrenceMaturity": {
+      "enum": [
+        "O0",
+        "O1",
+        "O2",
+        "O3",
+        "O4"
+      ],
+      "title": "OccurrenceMaturity",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "causal_evidence": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Causal Evidence",
+      "type": "array"
+    },
+    "content_id": {
+      "readOnly": true,
+      "title": "Content Id",
+      "type": "string"
+    },
+    "contract_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Contract Id",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "evidence_attachments": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Evidence Attachments",
+      "type": "array"
+    },
+    "evidence_state": {
+      "$ref": "#/$defs/EvidenceState"
+    },
+    "expiration_conditions": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Expiration Conditions",
+      "type": "array"
+    },
+    "generalization_evidence": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Generalization Evidence",
+      "type": "array"
+    },
+    "independence_evidence": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Independence Evidence",
+      "type": "array"
+    },
+    "known_failures": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Known Failures",
+      "type": "array"
+    },
+    "parents": {
+      "default": [],
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "title": "Parents",
+      "type": "array"
+    },
+    "proposal_id": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Proposal Id",
+      "type": "string"
+    },
+    "replication_evidence": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Replication Evidence",
+      "type": "array"
+    },
+    "resource_measurements": {
+      "items": {
+        "maxItems": 2,
+        "minItems": 2,
+        "prefixItems": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          }
+        ],
+        "type": "array"
+      },
+      "title": "Resource Measurements",
+      "type": "array"
+    },
+    "schema_version": {
+      "default": "0.1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "transfer_evidence": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Transfer Evidence",
+      "type": "array"
+    },
+    "validator_id": {
+      "title": "Validator Id",
+      "type": "string"
+    },
+    "validity_region": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Validity Region",
+      "type": "array"
+    }
+  },
+  "required": [
+    "created_at",
+    "proposal_id",
+    "contract_id",
+    "validator_id",
+    "evidence_state",
+    "resource_measurements",
+    "content_id"
+  ],
+  "title": "OccurrenceReport",
+  "type": "object"
+}
