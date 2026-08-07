@@ -262,4 +262,3 @@ not as a merge, deployment, physical validation, QEC result, superintelligence, 
   owner or visibility.
 - The existing Tasks 1--6 and recovered Task 7 implementation remain the baseline. This goal must
   reverify them and close the remaining Task 7 security gate before starting Task 8.
-
