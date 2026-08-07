@@ -67,5 +67,14 @@ Do not begin Task 8, E1, E2, CLI, provider, physical, or deployment work.
 - GitHub authentication for the existing `deesatzed` account is available, but no repository named
   `deesatzed/Q12D` and no other Q12D/quantum repository under that account was found. No remote was
   created because remote ownership/visibility must not be invented.
-- Next action: resolve the distinct Q12D destination and authorized remote required by Phase 2.
-  Task 7 and all experiments remain gated until Q12D preservation is durably verified.
+- Created a non-destructive distinct local recovery repository at
+  `/Volumes/WS4TB/Q12D-Recovered`. Its root commit is
+  `cbd14aa` (`chore: preserve recovered Q12D baseline`). The repository adds only recovery
+  documentation and `.gitignore`; all 26 preserved source files remain byte-identical to the
+  original inventory, with 591,420 bytes and stream digest
+  `c48fbbce1885c88f293222421033a9885562207bc57ed283d6bfb97be1e3a5f5`.
+- The initial recovery commit intentionally retains source whitespace and file modes rather than
+  normalizing recovered content. Subsequent repository status is clean.
+- Phase 2 remains incomplete because the local recovery repository has no remote. Next action:
+  obtain authorization for the distinct Q12D remote owner/name/visibility, push `cbd14aa`, and
+  verify it from the remote before Task 7. Task 7 and all experiments remain gated.
