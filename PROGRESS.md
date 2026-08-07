@@ -34,3 +34,14 @@ remaining verify-to-exec race and `preexec_fn` portability/thread-safety also re
 an explicit accepted threat-model decision.
 
 Do not begin Task 8, E1, E2, CLI, provider, physical, or deployment work.
+
+## 2026-08-07 Remaining-Steps Goal Preparation
+
+- The user approved one phased master goal covering non-destructive Q12D preservation, Task 7
+  containment, Tasks 8--12, final evidence review, and commit/push checkpoints.
+- Added the approved design record at
+  `docs/plans/2026-08-07-remaining-steps-master-goal-design.md` and pushed it as `75e21a2`.
+- Added the executable contract `GOAL_REMAINING_STEPS.md` and its execution overlay at
+  `docs/plans/2026-08-07-remaining-steps-master-goal.md`.
+- This preparation does not close the Task 7 gate and does not begin Task 8. The contract must be
+  invoked from the durable feature worktree with `/goal GOAL_REMAINING_STEPS.md`.

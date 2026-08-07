@@ -36,3 +36,16 @@ linked worktree rather than `/private/tmp`.
 
 **Reason:** The outage deleted the temporary checkout while Git refs and Codex transcript patches
 survived.
+
+## D-005: Use one gated remaining-steps master goal
+
+**Decision:** Use `GOAL_REMAINING_STEPS.md` as the approved autonomous completion contract. It
+preserves Q12D in a distinct repository, closes Task 7 before starting experiments, and then runs
+Tasks 8--12 with commit-and-push checkpoints after every completed phase.
+
+**Reason:** One durable state machine minimizes crash-time handoff loss while hard phase gates keep
+Q12D, security remediation, simulated experiments, and release evidence from being conflated.
+
+**Consequence:** D-001 remains binding until Task 7 has reviewed negative containment proof. The
+master goal does not authorize merging, deployment, physical work, E3--E5, destructive cleanup, or
+placing the legacy Q12D sources in AIRE history.
