@@ -45,3 +45,27 @@ Do not begin Task 8, E1, E2, CLI, provider, physical, or deployment work.
   `docs/plans/2026-08-07-remaining-steps-master-goal.md`.
 - This preparation does not close the Task 7 gate and does not begin Task 8. The contract must be
   invoked from the durable feature worktree with `/goal GOAL_REMAINING_STEPS.md`.
+
+## 2026-08-07 Master Goal Execution Baseline
+
+- Activated `GOAL_REMAINING_STEPS.md` from the durable linked worktree on
+  `feature/aire-v0.1`.
+- Starting AIRE feature checkpoint: local `HEAD` and `origin/feature/aire-v0.1` both
+  `eb1827caf934997640b257fb2b0029992fb8dc71`; the feature worktree was clean.
+- Refreshed remote refs after the sandboxed fetch could not write linked-worktree `FETCH_HEAD`.
+  `origin/main` is now `d0edd2f0321d015175b7ec624d43aef6312ade39`, while the legacy parent
+  checkout's local `main` remains 11 commits behind at `9d3f215`; that parent checkout and its
+  untracked Q12D sources were not changed.
+- `git fsck --full` reported no corruption. It reported only two dangling blobs, both previously
+  inspected superseded versions of AIRE design/status documentation:
+  `104c10bd8b9997146ea4fc4eb156fc9a7e69745d` and
+  `71048a5439989ccb1b4fe2909fb13987e8c7ddee`.
+- Q12D recovery inventory: 26 non-`.DS_Store` files, 591,420 total bytes, covering `Q12D.md`,
+  `src/`, and `Quantum Maze Teaching Model Plan/`. The deterministic stream digest of the sorted
+  per-file SHA-256 inventory is
+  `c48fbbce1885c88f293222421033a9885562207bc57ed283d6bfb97be1e3a5f5`.
+- GitHub authentication for the existing `deesatzed` account is available, but no repository named
+  `deesatzed/Q12D` and no other Q12D/quantum repository under that account was found. No remote was
+  created because remote ownership/visibility must not be invented.
+- Next action: resolve the distinct Q12D destination and authorized remote required by Phase 2.
+  Task 7 and all experiments remain gated until Q12D preservation is durably verified.
