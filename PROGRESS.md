@@ -78,3 +78,19 @@ Do not begin Task 8, E1, E2, CLI, provider, physical, or deployment work.
 - Phase 2 remains incomplete because the local recovery repository has no remote. Next action:
   obtain authorization for the distinct Q12D remote owner/name/visibility, push `cbd14aa`, and
   verify it from the remote before Task 7. Task 7 and all experiments remain gated.
+
+## 2026-08-07 Q12D Recovery Remote Verification
+
+- The user selected the existing public remote
+  `https://github.com/deesatzed/Q12Dgates.git`. It was empty before the recovery push: no default
+  branch, heads, or tags were present.
+- Added that remote as `origin` in `/Volumes/WS4TB/Q12D-Recovered` and pushed local `main` without
+  force. Local `main`, `origin/main`, and remote `HEAD` now resolve to
+  `cbd14aa8d08f1ea73469353a1cf4722b572df82c`.
+- Verified through a fresh depth-one clone that the remote contains 26 preserved source files,
+  591,420 source bytes, and inventory stream digest
+  `c48fbbce1885c88f293222421033a9885562207bc57ed283d6bfb97be1e3a5f5`.
+- Q12D Phase 2 is complete. The surviving originals remain unchanged and uncommitted in the legacy
+  parent checkout; the recovery baseline and its history are distinct from AIRE Prime.
+- Next action: begin Task 7 containment RED tests. Task 8 remains gated until Task 7 security,
+  review, and full-verification evidence are green.

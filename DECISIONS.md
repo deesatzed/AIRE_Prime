@@ -49,3 +49,15 @@ Q12D, security remediation, simulated experiments, and release evidence from bei
 **Consequence:** D-001 remains binding until Task 7 has reviewed negative containment proof. The
 master goal does not authorize merging, deployment, physical work, E3--E5, destructive cleanup, or
 placing the legacy Q12D sources in AIRE history.
+
+## D-006: Preserve Q12D in the existing Q12Dgates remote
+
+**Decision:** Use the user-selected existing public repository
+`https://github.com/deesatzed/Q12Dgates.git` as the distinct recovery remote for the Q12D baseline.
+
+**Reason:** The repository existed with the requested ownership and visibility but contained no
+branches or tags, so pushing the verified recovery root could not overwrite prior project history.
+
+**Consequence:** Q12D remains independent from AIRE Prime. Its recovery baseline is commit
+`cbd14aa8d08f1ea73469353a1cf4722b572df82c`; later Q12D work must use that repository and must not
+be folded into the AIRE feature branch.
