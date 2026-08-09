@@ -164,3 +164,5 @@ Do not begin Task 8, E1, E2, CLI, provider, physical, or deployment work.
 - The passing classification is only `simulated-capability-transfer`. It is not physical, QEC,
   alien-sense, superintelligence, or new-physics evidence. Next action after remote verification:
   begin Task 9 Measurement Layer Zero.
+- Task 8 phase commit `4bd84a6bc82846daaf7cd01dd14a702216104373` was pushed without
+  force. `git ls-remote --heads origin feature/aire-v0.1` resolved that exact commit before Task 9.

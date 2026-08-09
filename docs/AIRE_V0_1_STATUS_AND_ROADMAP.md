@@ -4,7 +4,7 @@
 
 **Implementation branch:** `feature/aire-v0.1`
 
-**Reviewed implementation baseline:** Task 8 E1 phase ready for its published checkpoint
+**Reviewed implementation baseline:** `4bd84a6` (Task 8 E1 implementation and evidence)
 
 ## Evidence boundary
 
