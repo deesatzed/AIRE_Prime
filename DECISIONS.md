@@ -116,3 +116,20 @@ scientifically unsupported even if deterministic tests passed.
 IDs pass independent hidden validation and every matched alternative fails under identical declared
 input-byte and interaction budgets. Failed gates downgrade the classification and remain in the
 canonical evidence.
+
+## D-011: Make Measurement Layer Zero contract-bound and fail-undetermined
+
+**Decision:** A provisional improvement decision must bind candidate measurements to the exact
+matched candidate arm, precommit the complete control-arm set, precommit protected dimensions and
+floors, recompute every resource comparison from frozen arms, and retain the full deterministic
+bootstrap distribution. Missing or inconsistent evidence yields `undetermined`, never zero or
+implicit success.
+
+**Reason:** Typed resource fields alone do not prevent comparison-status forgery, favorable-only
+control selection, swapped proposal samples, omitted safety dimensions, or post-hoc adjustment of
+resource mismatches.
+
+**Consequence:** Callers must supply exact control and protected contracts plus content-addressed
+candidate/control measurement evidence. Adjustments are bounded, structured, content-addressed,
+and limited to resource dimensions; observation access and receiver priors remain hard matching
+boundaries.

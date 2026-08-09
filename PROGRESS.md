@@ -166,3 +166,36 @@ Do not begin Task 8, E1, E2, CLI, provider, physical, or deployment work.
   begin Task 9 Measurement Layer Zero.
 - Task 8 phase commit `4bd84a6bc82846daaf7cd01dd14a702216104373` was pushed without
   force. `git ls-remote --heads origin feature/aire-v0.1` resolved that exact commit before Task 9.
+
+## 2026-08-07 Task 9 Measurement Layer Zero
+
+- Added a complete eight-dimension `ResourceVector`: packet bytes, peak resident bytes, operation
+  count, interaction count, elapsed time, external calls, declared energy proxy, and declared
+  bandwidth. Missing values are typed `undetermined` with `None`; discrete resources reject
+  fractional counts.
+- Resource comparisons recompute evidence from frozen candidate/control arms. Their dimension
+  buckets are disjoint and exhaustive, status is derived from those buckets, hidden priors and
+  observation access cannot be adjusted, and structured resource adjustments retain method,
+  rationale, magnitude bound, and content ID.
+- Added deterministic targeted, disjoint equal-size random-subspace, activation-permutation, and
+  representation-replacement ablations. Reports retain every control and bind activation, target,
+  evaluator, metric, and replacement-strategy commitments.
+- Added deterministic seeded bootstrap decisions with full sorted effect distributions, one-sided
+  decision quantiles, maximum-control comparison plus delta, and protected-dimension floors.
+  Outcomes are only `provisional`, `rejected`, or `undetermined`.
+- Control contracts precommit the exact control-arm set; protected contracts precommit exact names
+  and floors; candidate samples bind candidate arm, metric, and measurement artifact. Missing,
+  extra, substituted, unmatched, or post-hoc omitted evidence cannot produce `provisional`.
+- Review initially found forgeable comparison status, favorable-only controls, unaudited
+  adjustments, sham overlap, weak ablation provenance, unbound candidate samples, and omittable
+  protected dimensions. All were accepted and resolved. Final review: Ready, with no Critical,
+  Important, or blocking Minor findings.
+- Final local verification:
+  - `PYTHONDONTWRITEBYTECODE=1 .venv/bin/pytest tests/measurement -q` -> 19 passed;
+  - `PYTHONDONTWRITEBYTECODE=1 .venv/bin/pytest -q` -> 222 passed;
+  - `.venv/bin/ruff check .` -> all checks passed;
+  - `.venv/bin/mypy aire_prime` -> success in 36 source files;
+  - `.venv/bin/python scripts/export_schemas.py --check` -> exit 0;
+  - `git diff --check` -> exit 0.
+- Next action after commit/push verification: Task 10 E2 simulated alien-sense transfer. Task 9 is
+  measurement infrastructure; it does not itself establish E1/E2 improvement or physical evidence.

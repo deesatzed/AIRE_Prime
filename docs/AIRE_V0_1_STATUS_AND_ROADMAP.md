@@ -131,6 +131,11 @@ evidence; E2 has not been implemented or demonstrated.
    Is an apparent advantage causal, resource-matched, statistically defensible, and robust to sham
    ablations and protected-dimension checks?
 
+   **Current evidence:** green. Eight resource dimensions retain observed or explicit
+   `undetermined` state; comparisons are recomputed from frozen arms; controls and protected
+   floors are precommitted; four ablation families are retained; deterministic bootstrap decisions
+   use the maximum matched control and can return only provisional, rejected, or undetermined.
+
 6. **Task 10: E2 simulated alien-sense transfer**
 
    Can a system discover a consequential distinction absent from the declared baseline ontology,
@@ -160,6 +165,7 @@ would remain simulator-level.
 
 ## Current next action
 
-After publishing and verifying the Task 8 checkpoint, begin Task 9 Measurement Layer Zero under
-[`GOAL_REMAINING_STEPS.md`](../GOAL_REMAINING_STEPS.md). E1 remains simulated protocol evidence and
-must not be described as alien-sense, physical, QEC, superintelligence, or new-physics evidence.
+After publishing and verifying the Task 9 checkpoint, begin Task 10 simulated E2 under
+[`GOAL_REMAINING_STEPS.md`](../GOAL_REMAINING_STEPS.md). E1 and Measurement Layer Zero remain
+simulated protocol/infrastructure evidence and must not be described as physical, QEC,
+superintelligence, or new-physics evidence.
