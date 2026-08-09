@@ -7,6 +7,8 @@ This review covers the Task 7 agent boundary on `feature/aire-v0.1` against
 the implementation in three rounds. Their early Critical and Important findings were either
 implemented and re-tested or adjudicated below with explicit threat-model evidence.
 
+Reviewed implementation commit: `b19cfb3`.
+
 **Judgment: Task 7 is ready to close on its deliberately narrow supported host: macOS 27 on
 arm64, only when the functional Seatbelt probe passes.** Every other platform, architecture,
 version, or unavailable launcher returns typed `ContainmentUnavailable` evidence without starting

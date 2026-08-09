@@ -4,7 +4,7 @@
 
 **Implementation branch:** `feature/aire-v0.1`
 
-**Reviewed implementation baseline:** Task 7 containment phase (see `PROGRESS.md` for pushed commit)
+**Reviewed implementation baseline:** `b19cfb3` (Task 7 containment implementation and review)
 
 ## Evidence boundary
 

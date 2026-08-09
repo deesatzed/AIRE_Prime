@@ -116,7 +116,14 @@ Do not begin Task 8, E1, E2, CLI, provider, physical, or deployment work.
   Critical findings were accepted and resolved. Important findings were resolved or explicitly
   adjudicated in `REVIEW.md` and D-007--D-009; residual `system.sb`, same-UID race, and memory-limit
   boundaries remain stated limitations rather than erased threats.
-- Focused containment evidence: 63 tests collected. Final full commands and phase commit IDs will
-  be recorded after the clean verification and push checkpoint.
-- Next action: complete Task 7 full verification, commit, push, and verify the remote head. Task 8
-  remains gated until that checkpoint is durable.
+- Task 7 implementation and review commit: `b19cfb3`
+  (`feat: enforce fail-closed Task 7 host containment`).
+- Final local verification from the durable worktree:
+  - `PYTHONDONTWRITEBYTECODE=1 .venv/bin/pytest tests/agents -v` -> 63 passed;
+  - `PYTHONDONTWRITEBYTECODE=1 .venv/bin/pytest -q` -> 195 passed;
+  - `.venv/bin/ruff check .` -> all checks passed;
+  - `.venv/bin/mypy` -> success in 25 source files;
+  - `.venv/bin/python scripts/export_schemas.py --check` -> exit 0;
+  - `git diff --check` -> exit 0.
+- Next action: push the Task 7 checkpoint and confirm the remote head equals the local evidence
+  commit, then begin Task 8 E1. No experiment work began while the containment gate was red.
