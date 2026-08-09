@@ -4,7 +4,7 @@
 
 **Implementation branch:** `feature/aire-v0.1`
 
-**Reviewed implementation baseline:** `4bd84a6` (Task 8 E1 implementation and evidence)
+**Reviewed implementation baseline:** `d0bd6c3` (Task 9 matched measurement controls)
 
 ## Evidence boundary
 

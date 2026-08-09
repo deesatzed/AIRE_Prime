@@ -199,3 +199,5 @@ Do not begin Task 8, E1, E2, CLI, provider, physical, or deployment work.
   - `git diff --check` -> exit 0.
 - Next action after commit/push verification: Task 10 E2 simulated alien-sense transfer. Task 9 is
   measurement infrastructure; it does not itself establish E1/E2 improvement or physical evidence.
+- Task 9 phase commit `d0bd6c3943ebb0ebb6c34a89fd0f470e00ee1844` was pushed without
+  force and resolved exactly from `origin/feature/aire-v0.1` before Task 10.
