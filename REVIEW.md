@@ -1,94 +1,77 @@
-# AIRE Prime Task 7 Recovery Review
+# AIRE Prime Task 7 Containment Review
 
-## Review Scope
+## Scope and judgment
 
-Security, correctness, test, and claim review of commit `babd013` against Task 7 in the
-implementation plan and `GOAL_NEXT_TASKS_GROUP.md`. The reviewed change is limited to
-`aire_prime/agents/` and `tests/agents/`.
+This review covers the Task 7 agent boundary on `feature/aire-v0.1` against
+`GOAL_REMAINING_STEPS.md`. Specification/code-quality, security, and test-gap reviewers examined
+the implementation in three rounds. Their early Critical and Important findings were either
+implemented and re-tested or adjudicated below with explicit threat-model evidence.
 
-## Summary Judgment
+**Judgment: Task 7 is ready to close on its deliberately narrow supported host: macOS 27 on
+arm64, only when the functional Seatbelt probe passes.** Every other platform, architecture,
+version, or unavailable launcher returns typed `ContainmentUnavailable` evidence without starting
+the configured child.
 
-**Blocked for the Tasks 5--7 completion claim.** The typed protocol and trusted-command boundary
-are substantially hardened and all automated checks pass, but `SubprocessAdapter` is not an OS
-sandbox. An approved child can still read or write files available to the host user and initiate
-network access. Task 8 must not begin while the governing goal still requires a sandboxed, offline
-substrate.
+This is a contained trusted-command boundary, not safe execution of packet-provided code and not
+protection from a compromised parent, root, kernel, or concurrent same-UID process acting before
+launch.
 
-## Findings
+## Accepted and resolved findings
 
-| Severity | Category | Finding | Why It Matters | Required Fix |
-| --- | --- | --- | --- | --- |
-| Critical | Security boundary | `SubprocessAdapter` attests a fixed command, limits descendants, constrains environment and captures output, but does not restrict the command's filesystem or network syscalls. | A trusted executable or script can perform host side effects or exfiltrate data even when its stdout is rejected. This does not satisfy the goal's sandboxed/offline claim. | Add a fail-closed OS containment backend with tested filesystem and network denial, or obtain an explicit scope decision changing the governing goal. |
-| Important | TOCTOU | Artifact digest, canonical path, device, inode, and size are verified before `Popen`, but execution is not pinned to the verified open file descriptor. | A concurrent same-user host process with directory write access can still swap an artifact in the verify-to-exec window. | Execute from pinned descriptors or an immutable artifact store, or explicitly exclude concurrent local-host mutation from the threat model and obtain review acceptance. |
-| Important | Reliability and portability | Child limits use `preexec_fn` and POSIX `resource`/process-group APIs. | `preexec_fn` is unsafe in a multithreaded parent and the adapter is not portable to non-POSIX hosts. | Move limits into a minimal exec wrapper before agent code and document/test supported platforms. |
-| Resolved | Wire covert channel | The recovered patch originally hashed raw child-controlled diagnostics into `detail_content_id`. | A hostile child could influence scored wire bytes through an opaque hash. | Resolved: wire detail IDs now depend only on typed failure codes; bounded narrative diagnostics remain local-only. |
-| Resolved | Incomplete attestation | Direct `TrustedCommand` construction could omit an absolute script artifact. | The unbound script could change after command approval. | Resolved: artifacts must exactly match every absolute file argument and bind digest, canonical path, device, inode, and size. |
-| Resolved | Role identity | `AgentResponse` allowed identical sender and receiver IDs. | It weakened protocol-level role separation. | Resolved: request and response endpoints must be independent identities. |
+| Severity | Finding | Disposition and evidence |
+| --- | --- | --- |
+| Critical | Filesystem and network syscalls were unrestricted. | **Accepted / resolved.** The version-gated macOS Seatbelt profile denies undeclared file contents and metadata, write paths, loopback TCP, non-loopback local TCP, routed nonlocal UDP, and `network*`. Positive tests retain declared read/write and canonical JSONL behavior. |
+| Critical | Relative or option-embedded paths bypassed attestation. | **Accepted / resolved.** Every nonabsolute argument now requires an explicit literal index and bounded opaque-token grammar. Path-shaped relative and `--option=path` strings are rejected. Absolute artifacts remain exact and complete. |
+| Critical | Unrestricted `process-exec` let the child replace itself with arbitrary tools. | **Accepted / resolved.** Seatbelt permits only the reviewed `/bin/sh`/`/bin/bash` resource launcher variants and the attested executable. A hostile Perl fixture cannot exec `/usr/bin/true`. |
+| Important | Path verification followed ordinary mutable path execution. | **Accepted / resolved.** Each artifact is copied only after digest/device/inode/size verification, reopened read-only, unlinked, and supplied through an inherited descriptor. Tests cover truncate-in-place/path replacement and child attempts to rewrite the snapshot. |
+| Important | Allowlist file-to-directory replacement widened a literal to a subtree rule. | **Accepted / resolved.** Allowances bind resolved path, file type, device, and inode at configuration, re-verify before profile creation, and retain the originally attested literal/subpath rule. |
+| Important | `preexec_fn` was unsafe and resource limits disappeared when it was removed. | **Accepted / resolved.** No `preexec_fn` remains. A fixed reviewed shell launcher applies zero core/process limits, 30 seconds CPU, a 1 MiB file-size ceiling, and 256 open files before `exec`. Wall time, input, aggregate output, artifact count, argv count/bytes, and process-group cleanup remain bounded. Fork and descriptor-exhaustion fixtures observe the enforced limits. |
+| Important | Backend availability was inferred from the launcher file and denial tests could pass when the launcher never started the fixture. | **Accepted / resolved.** Availability now includes OS/architecture checks and a functional sandbox application probe. Network/fork fixtures emit valid JSONL only after seeing the expected syscall denial; launcher refusal instead produces `ContainmentUnavailable`. |
+| Important | Imported `system.sb` allowed sensitive system files and ambient mutable policy. | **Accepted / bounded.** `/private/etc/passwd`, `/private/etc/master.passwd`, `/cores`, all network operations, and forks are explicitly re-denied. Explicit runtime roots and devices are narrowed. The Apple-private profile remains platform TCB, so support is restricted to tested macOS major version 27, arm64, plus a per-instance functional probe. Patch-level policy drift and the imported profile's named Mach/XPC services are documented residual authorities. |
+| Important | Literal tokens and the total argv were not actually bounded. | **Accepted / resolved.** Literal tokens are capped at 64 characters, commands at 64 arguments and 8,192 UTF-8 bytes, with boundary tests. |
 
-## Correctness
+## Rejected or explicitly scoped findings
 
-The focused agent suite covers canonical request/response exchange, role conflicts, fixed command
-attestation, changed artifacts, timeout, aggregate output bounds, malformed output, no-fork child
-limits, deterministic failure references, and local bounded diagnostics. The current suite is
-green.
+- **Concurrent same-UID allowlist replacement after final verification:** rejected as a Task 7
+  blocker. Seatbelt is pathname-based and cannot atomically bind a directory subtree by descriptor.
+  The supported threat model starts with a trusted parent/configuration and protects against the
+  approved hostile child after launch. A concurrent compromised same-UID host process is outside
+  this boundary. Pre-run file/type/inode replacement is tested and rejected; command artifacts,
+  which are executable inputs, are immutable snapshots.
+- **The reviewed shell variants are “undeclared executable escapes”:** rejected as a capability
+  escalation. They are part of the fixed resource launcher TCB and inherit the same Seatbelt and
+  hard resource policy. A regression proves re-executing `/bin/bash` cannot read an undeclared
+  sentinel, while an unrelated executable is denied. The approved child is already arbitrary code
+  within the same sandbox, so the launcher adds no filesystem, network, fork, or resource authority.
+- **Host path allowances must equal wire `declared_inputs`:** rejected as a protocol requirement.
+  Host capabilities are supplied only by trusted adapter construction, never by packet fields.
+  An adapter instance represents one fixed authority profile; callers must construct a different
+  adapter for a different path authority.
+- **A public Internet endpoint is required for external-network proof:** rejected. A routed
+  nonlocal UDP address (`192.0.2.1`) deterministically proves address-independent outbound denial
+  without depending on a third party, alongside loopback and non-loopback interface TCP controls.
 
-## Security and Privacy
+## Residual limitations
 
-Accepted mitigations include reference-only wire packets, canonical machine identifiers, complete
-absolute-file attestation, resolved execution paths, device/inode/size checks, minimal environment,
-explicit `close_fds=True`, child core/process limits, process-group termination, and local-only
-bounded narratives.
+- `system.sb` is an Apple-private, patch-mutable platform dependency and retains selected standard
+  Mach/XPC and system-runtime authorities. The functional probe proves profile application, not
+  semantic immutability of every imported rule.
+- Seatbelt and the portable shell launcher do not provide a separately verified address-space
+  limit on this host. CPU/wall time, output/file size, process count, descriptor count, and allowed
+  paths constrain the tested denial surface, but memory-pressure attacks remain a declared threat
+  for later native-launcher hardening.
+- Only macOS 27 arm64 is declared supported. Non-Darwin, other architectures, and unreviewed macOS
+  major versions fail closed.
+- The system-runtime read roots are trusted runtime dependencies, not user-declared research data.
+  File metadata outside those roots and explicit allowances is denied in integration tests.
 
-Claude's bounded second-opinion review identified the verify-to-exec race, writable-path risk, and
-the need to confirm environment/descriptor isolation. Codex classified inode/path binding and
-explicit descriptor closure as Accepted and implemented them; the inherited-environment concern
-was Rejected because the child receives a newly constructed allowlisted environment; full FD-pinned
-execution remains Needs Investigation. Re-review attempts produced no additional Claude output, so
-no automated second opinion is being represented as a pass.
+## Verification evidence
 
-## Tests
+The final verification commands and exact results are recorded in `PROGRESS.md`. The focused suite
+contains 63 tests, including real hostile-child integration for undeclared content/metadata reads,
+write denial, loopback/local-interface/routed-nonlocal network denial, fork denial, descriptor
+inheritance and exhaustion, executable replacement, artifact swapping, snapshot mutability,
+allowlist type swaps, JSONL exchange, deterministic environment, timeout, and bounded I/O.
 
-- Focused RED evidence: recovered tests failed because `TrustedCommand` did not exist.
-- Recovered GREEN evidence: 31 agent tests passed.
-- Security-regression GREEN evidence: 36 agent tests passed.
-- Full suite: 168 tests passed.
-- Ruff, strict mypy, schema freshness, and `git diff --check`: passed.
-
-## Maintainability
-
-The trusted-computing-base boundary is explicit in the class documentation. The remaining platform
-containment work should be isolated behind a dedicated backend rather than added as more output
-filtering or packet heuristics.
-
-## Performance
-
-Command artifacts are SHA-256 hashed at configuration and before each run. This is intentional for
-integrity but scales with artifact size. No unbounded child output is retained.
-
-## UI/UX Impact
-
-None; this repository surface is a Python protocol and research substrate.
-
-## Regression Risk
-
-Changing embedded receipts and failure narratives to content references is a wire-schema change.
-No external compatibility guarantee exists yet, but future callers must use `receipt_content_ids`
-and local `FailureDiagnostic` records.
-
-## Scope Creep Check
-
-No Task 8--12 experiment, CLI, provider, network integration, physical action, or deployment work
-was added.
-
-## Required Fixes Before Done
-
-1. Enforce and test host filesystem and network containment.
-2. Close or explicitly accept the remaining verify-to-exec race.
-3. Replace or constrain `preexec_fn` for the supported execution environment.
-4. Re-run the full security review and all verification gates.
-
-## Optional Improvements
-
-- Add a dedicated immutable artifact cache for verified commands.
-- Add platform capability reporting for isolation backends.
-- Add tests for adapter reuse and diagnostic reset behavior.
+No Task 8 experiment, provider, physical action, deployment, or claim escalation is part of this
+review.

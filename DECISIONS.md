@@ -61,3 +61,41 @@ branches or tags, so pushing the verified recovery root could not overwrite prio
 **Consequence:** Q12D remains independent from AIRE Prime. Its recovery baseline is commit
 `cbd14aa8d08f1ea73469353a1cf4722b572df82c`; later Q12D work must use that repository and must not
 be folded into the AIRE feature branch.
+
+## D-007: Declare a narrow fail-closed containment platform
+
+**Decision:** Task 7 production subprocess execution is supported only on macOS 27 arm64 when a
+functional `/usr/bin/sandbox-exec` probe applies the reviewed profile. Every other host returns
+typed `ContainmentUnavailable` evidence without executing the configured child.
+
+**Reason:** Seatbelt and its private `system.sb` dependency are platform- and version-sensitive.
+Existence and ownership checks alone do not prove that containment can be applied.
+
+**Consequence:** The platform TCB includes the sealed system executables, the reviewed shell
+resource launcher, Seatbelt, and imported standard system runtime/Mach authorities. The profile
+explicitly re-denies sensitive password files, core writes, network operations, and forks.
+
+## D-008: Make command artifacts immutable and literals explicit
+
+**Decision:** Absolute artifacts execute from verified, read-only, unlinked snapshots. Every
+nonabsolute argv token must be explicitly classified as a bounded opaque literal; path-shaped
+literals are rejected. Secondary execution is limited to the reviewed shell launcher variants and
+the attested executable.
+
+**Reason:** Path/digest checks followed by normal path execution, relative arguments, embedded
+option paths, writable snapshot descriptors, and unrestricted `process-exec` each left a way for
+approved bytes to change or for the child to replace the approved command boundary.
+
+## D-009: Scope pathname containment to a trusted parent
+
+**Decision:** The Task 7 threat model protects against the approved hostile child after launch. It
+does not claim protection from root, the kernel, a compromised parent/configuration, or a
+concurrent same-UID host process racing pathname allowances before `Popen`.
+
+**Reason:** macOS Seatbelt grants directory capabilities by pathname, not by an atomically pinned
+directory descriptor. Artifact bytes can be snapshotted; directory-subtree authority cannot be
+made equivalent with this backend.
+
+**Consequence:** Allowance path/type/device/inode changes before preparation fail closed, and
+artifact races are closed. Stronger same-UID concurrency protection and a native memory-limiting
+launcher remain future hardening, not claims of this v0.1 boundary.

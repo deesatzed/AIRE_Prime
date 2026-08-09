@@ -21,16 +21,19 @@ Tasks 1--7 have implementations on `feature/aire-v0.1`:
 - seven immutable AIRE proposal, contract, and report objects with deterministic JSON Schemas.
 - an allow-listed bounded GRO realizer and realization receipts;
 - an append-only, tamper-evident evidence registry; and
-- typed isolated-role packets plus a fixed, attested trusted-command subprocess boundary.
+- typed isolated-role packets plus a fail-closed, attested macOS containment boundary.
 
-The recovered and hardened branch has 168 passing tests plus Ruff, strict mypy, and
-schema-freshness checks. This establishes an auditable representation and evidence substrate. It
-does **not** yet satisfy the Tasks 5--7 completion goal: the subprocess boundary is not an OS
-sandbox and does not block filesystem or network syscalls by the approved child. It also does not
-establish capability transfer, an alien AI sense, QEC improvement, superintelligence, or new
-physics.
+Task 7 supports macOS 27 arm64 only when its functional Seatbelt probe passes. It fails closed on
+other hosts. The contained boundary uses immutable artifact snapshots, explicit bounded command
+literals, deterministic environment construction, filesystem allowlists, network/fork denial,
+resource limits, descriptor isolation, bounded JSONL exchange, and typed refusal evidence. See
+`REVIEW.md` for its exact threat model and residual Apple-private-profile, same-UID-race, and memory
+limitations.
 
-The current work remains Task 7 security remediation under
-[GOAL_NEXT_TASKS_GROUP.md](GOAL_NEXT_TASKS_GROUP.md). Do not begin E1 or E2. The complete status,
-review findings, and experimental roadmap are documented in
+This establishes an auditable representation and evidence substrate. It does not establish
+capability transfer, an alien AI sense, QEC improvement, superintelligence, or new physics.
+
+The next gated phase is Task 8 E1 capability reconstruction under
+[GOAL_REMAINING_STEPS.md](GOAL_REMAINING_STEPS.md). The complete status, review findings, and
+experimental roadmap are documented in
 [AIRE v0.1 Status and Roadmap](docs/AIRE_V0_1_STATUS_AND_ROADMAP.md).

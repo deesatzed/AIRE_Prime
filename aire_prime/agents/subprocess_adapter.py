@@ -1,16 +1,21 @@
 import hashlib
+import json
 import math
 import os
-import resource
+import platform
+import re
 import selectors
 import signal
 import stat
 import subprocess
+import sys
+import tempfile
 from contextlib import suppress
 from dataclasses import dataclass, field
+from functools import cached_property
 from pathlib import Path
 from time import monotonic
-from typing import Any
+from typing import Any, Protocol
 
 from pydantic import field_validator, model_validator
 
@@ -25,11 +30,365 @@ from aire_prime.core.canonical import content_id
 from aire_prime.core.model import FrozenModel
 from aire_prime.objects import ContentID
 
-SAFE_ENVIRONMENT_KEYS = frozenset({"LANG", "LC_ALL", "TZ"})
+DETERMINISTIC_ENVIRONMENT = {"LANG": "C", "LC_ALL": "C", "TZ": "UTC"}
 FILE_ACCESS_FIELDS = frozenset(
     {"file_access", "file_access_request", "file_access_requests", "path_request"}
 )
 MAX_DIAGNOSTIC_COUNTEREXAMPLE_CHARS = 128
+MAX_COMMAND_ARTIFACTS = 64
+MAX_COMMAND_ARGUMENTS = 64
+MAX_COMMAND_ARGV_BYTES = 8_192
+MAX_LITERAL_ARGUMENT_CHARS = 64
+MAX_CHILD_OPEN_FILES = 256
+RESOURCE_LIMIT_LAUNCHER = (
+    "set -e; "
+    "ulimit -c 0; "
+    f"ulimit -n {MAX_CHILD_OPEN_FILES}; "
+    "ulimit -u 0; "
+    "ulimit -t 30; "
+    "ulimit -f 2048; "
+    'exec "$@"'
+)
+
+
+@dataclass(frozen=True)
+class PathAllowance:
+    path: Path
+    is_directory: bool
+    device: int
+    inode: int
+
+    @classmethod
+    def attest(cls, path: Path) -> "PathAllowance":
+        resolved = path.resolve(strict=True)
+        file_stat = resolved.lstat()
+        if not (stat.S_ISREG(file_stat.st_mode) or stat.S_ISDIR(file_stat.st_mode)):
+            raise ValueError("allowed path must be a regular file or directory")
+        return cls(
+            path=resolved,
+            is_directory=stat.S_ISDIR(file_stat.st_mode),
+            device=file_stat.st_dev,
+            inode=file_stat.st_ino,
+        )
+
+    def verify(self) -> bool:
+        try:
+            file_stat = self.path.lstat()
+        except OSError:
+            return False
+        return (
+            stat.S_ISDIR(file_stat.st_mode) == self.is_directory
+            and (stat.S_ISREG(file_stat.st_mode) or self.is_directory)
+            and file_stat.st_dev == self.device
+            and file_stat.st_ino == self.inode
+        )
+
+
+class ContainmentBackend(Protocol):
+    @property
+    def available(self) -> bool: ...
+
+    def prepare(
+        self,
+        *,
+        trusted_command: "TrustedCommand",
+        working_directory: Path,
+        allowed_read_paths: tuple[PathAllowance, ...],
+        allowed_write_paths: tuple[PathAllowance, ...],
+    ) -> "PreparedExecution": ...
+
+
+class ContainmentPreparationError(RuntimeError):
+    """The required host containment could not be prepared safely."""
+
+
+class UnavailableContainmentBackend:
+    """Fail-closed backend used when no supported host containment exists."""
+
+    @property
+    def available(self) -> bool:
+        return False
+
+    def prepare(
+        self,
+        *,
+        trusted_command: "TrustedCommand",
+        working_directory: Path,
+        allowed_read_paths: tuple[PathAllowance, ...],
+        allowed_write_paths: tuple[PathAllowance, ...],
+    ) -> "PreparedExecution":
+        del trusted_command, working_directory, allowed_read_paths, allowed_write_paths
+        raise ContainmentPreparationError("no supported host containment backend is available")
+
+
+@dataclass
+class PreparedExecution:
+    argv: tuple[str, ...]
+    pass_fds: tuple[int, ...] = ()
+
+    def close(self) -> None:
+        for descriptor in self.pass_fds:
+            with suppress(OSError):
+                os.close(descriptor)
+
+
+class MacOSSandboxBackend:
+    """Fail-closed host containment using the macOS Seatbelt launcher."""
+
+    sandbox_executable = Path("/usr/bin/sandbox-exec")
+    _supported_macos_major_versions = frozenset({27})
+    _supported_machines = frozenset({"arm64"})
+    _trusted_executable_roots = (
+        Path("/bin"),
+        Path("/sbin"),
+        Path("/usr/bin"),
+        Path("/usr/sbin"),
+        Path("/System"),
+    )
+    _system_read_roots = (
+        Path("/System"),
+        Path("/usr"),
+        Path("/bin"),
+        Path("/sbin"),
+        Path("/Library/Apple"),
+        Path("/private/var/select"),
+        Path("/dev/fd"),
+        Path("/dev/null"),
+        Path("/dev/random"),
+        Path("/dev/urandom"),
+    )
+
+    @cached_property
+    def available(self) -> bool:
+        if sys.platform != "darwin":
+            return False
+        try:
+            macos_major = int(platform.mac_ver()[0].split(".", 1)[0])
+        except (ValueError, IndexError):
+            return False
+        if (
+            macos_major not in self._supported_macos_major_versions
+            or platform.machine() not in self._supported_machines
+        ):
+            return False
+        try:
+            file_stat = self.sandbox_executable.stat()
+        except OSError:
+            return False
+        metadata_is_trusted = (
+            stat.S_ISREG(file_stat.st_mode)
+            and file_stat.st_uid == 0
+            and file_stat.st_mode & (stat.S_IWGRP | stat.S_IWOTH) == 0
+            and os.access(self.sandbox_executable, os.X_OK)
+        )
+        if not metadata_is_trusted:
+            return False
+        try:
+            probe = subprocess.run(
+                [
+                    str(self.sandbox_executable),
+                    "-p",
+                    self._profile(
+                        working_directory=Path("/"),
+                        executable_path=Path("/usr/bin/true"),
+                        allowed_read_paths=(),
+                        allowed_write_paths=(),
+                    ),
+                    "/usr/bin/true",
+                ],
+                check=False,
+                close_fds=True,
+                capture_output=True,
+                env=DETERMINISTIC_ENVIRONMENT,
+                timeout=2,
+            )
+        except (OSError, subprocess.SubprocessError):
+            return False
+        return probe.returncode == 0
+
+    @staticmethod
+    def _profile_path_filter(path: Path) -> str:
+        operation = "subpath" if path.is_dir() else "literal"
+        return f"({operation} {json.dumps(str(path))})"
+
+    @staticmethod
+    def _allowance_filter(allowance: PathAllowance) -> str:
+        operation = "subpath" if allowance.is_directory else "literal"
+        return f"({operation} {json.dumps(str(allowance.path))})"
+
+    @classmethod
+    def _is_sealed_system_executable(cls, path: Path, file_stat: os.stat_result) -> bool:
+        if file_stat.st_uid != 0 or file_stat.st_mode & (stat.S_IWGRP | stat.S_IWOTH):
+            return False
+        return any(
+            path == root or path.is_relative_to(root)
+            for root in cls._trusted_executable_roots
+        )
+
+    @staticmethod
+    def _open_verified_artifact(artifact: "CommandArtifact") -> int:
+        flags = os.O_RDONLY | os.O_CLOEXEC
+        if hasattr(os, "O_NOFOLLOW"):
+            flags |= os.O_NOFOLLOW
+        try:
+            descriptor = os.open(artifact.resolved_path, flags)
+        except OSError as error:
+            raise ContainmentPreparationError("trusted artifact could not be pinned") from error
+        snapshot_descriptor = -1
+        snapshot_path = ""
+        try:
+            file_stat = os.fstat(descriptor)
+            digest = hashlib.sha256()
+            snapshot_descriptor, snapshot_path = tempfile.mkstemp(prefix="aire-artifact-")
+            while chunk := os.read(descriptor, 1_048_576):
+                digest.update(chunk)
+                unwritten = memoryview(chunk)
+                while unwritten:
+                    unwritten = unwritten[os.write(snapshot_descriptor, unwritten) :]
+            if (
+                not stat.S_ISREG(file_stat.st_mode)
+                or f"sha256:{digest.hexdigest()}" != artifact.digest
+                or file_stat.st_dev != artifact.device
+                or file_stat.st_ino != artifact.inode
+                or file_stat.st_size != artifact.size
+            ):
+                raise ContainmentPreparationError("trusted artifact changed before execution")
+            os.fsync(snapshot_descriptor)
+            read_flags = os.O_RDONLY | os.O_CLOEXEC
+            if hasattr(os, "O_NOFOLLOW"):
+                read_flags |= os.O_NOFOLLOW
+            return os.open(snapshot_path, read_flags)
+        finally:
+            os.close(descriptor)
+            if snapshot_descriptor >= 0:
+                os.close(snapshot_descriptor)
+            if snapshot_path:
+                with suppress(OSError):
+                    os.unlink(snapshot_path)
+
+    def _profile(
+        self,
+        *,
+        working_directory: Path,
+        executable_path: Path,
+        allowed_read_paths: tuple[PathAllowance, ...],
+        allowed_write_paths: tuple[PathAllowance, ...],
+    ) -> str:
+        read_filters = " ".join(
+            (
+                f"(literal {json.dumps(str(working_directory))})",
+                *(
+                    self._profile_path_filter(path)
+                    for path in self._system_read_roots
+                ),
+                *(self._allowance_filter(item) for item in allowed_read_paths),
+            )
+        )
+        write_filters = " ".join(
+            (
+                self._profile_path_filter(Path("/dev/null")),
+                *(self._allowance_filter(item) for item in allowed_write_paths),
+            )
+        )
+        working_directory_metadata_rule = (
+            ""
+            if working_directory == Path("/")
+            else "(allow file-read-metadata file-test-existence "
+            f"(literal {json.dumps(str(working_directory))}) "
+            f"(path-ancestors {json.dumps(str(working_directory))}))"
+        )
+        return " ".join(
+            (
+                "(version 1)",
+                "(deny default)",
+                '(import "system.sb")',
+                '(deny file-read* (literal "/private/etc/master.passwd") '
+                '(literal "/private/etc/passwd"))',
+                '(deny file-write* (subpath "/cores"))',
+                "(allow process-exec "
+                f"(literal {json.dumps('/bin/sh')}) "
+                f"(literal {json.dumps('/bin/bash')}) "
+                f"(literal {json.dumps(str(executable_path))}))",
+                working_directory_metadata_rule,
+                f"(allow file-read* {read_filters})",
+                f"(allow file-write* {write_filters})",
+                "(deny network*)",
+                "(deny process-fork)",
+            )
+        )
+
+    def prepare(
+        self,
+        *,
+        trusted_command: "TrustedCommand",
+        working_directory: Path,
+        allowed_read_paths: tuple[PathAllowance, ...],
+        allowed_write_paths: tuple[PathAllowance, ...],
+    ) -> PreparedExecution:
+        if not self.available:
+            raise ContainmentPreparationError("macOS containment backend is unavailable")
+        if not all(
+            allowance.verify() for allowance in (*allowed_read_paths, *allowed_write_paths)
+        ):
+            raise ContainmentPreparationError("allowed filesystem path changed before execution")
+        descriptors: dict[str, int] = {}
+        try:
+            for artifact in trusted_command.artifacts:
+                descriptors[artifact.path] = self._open_verified_artifact(artifact)
+            executable_artifact = next(
+                artifact
+                for artifact in trusted_command.artifacts
+                if artifact.path == trusted_command.argv[0]
+            )
+            executable_path = Path(executable_artifact.resolved_path)
+            executable_stat = executable_path.stat()
+            if not self._is_sealed_system_executable(executable_path, executable_stat):
+                raise ContainmentPreparationError(
+                    "contained command executable must be on the sealed root-owned system volume"
+                )
+            execution_argv = tuple(
+                executable_artifact.resolved_path
+                if index == 0
+                else f"/dev/fd/{descriptors[argument]}"
+                if argument in descriptors
+                else argument
+                for index, argument in enumerate(trusted_command.argv)
+            )
+            profile = self._profile(
+                working_directory=working_directory,
+                executable_path=executable_path,
+                allowed_read_paths=allowed_read_paths,
+                allowed_write_paths=allowed_write_paths,
+            )
+            pass_fds = tuple(descriptors.values())
+            if any(descriptor >= MAX_CHILD_OPEN_FILES for descriptor in pass_fds):
+                raise ContainmentPreparationError(
+                    "artifact descriptor exceeds the contained open-file ceiling"
+                )
+            return PreparedExecution(
+                argv=(
+                    str(self.sandbox_executable),
+                    "-p",
+                    profile,
+                    "/bin/sh",
+                    "-c",
+                    RESOURCE_LIMIT_LAUNCHER,
+                    "aire-resource-launcher",
+                    *execution_argv,
+                ),
+                pass_fds=pass_fds,
+            )
+        except BaseException:
+            for descriptor in descriptors.values():
+                with suppress(OSError):
+                    os.close(descriptor)
+            raise
+
+
+def _platform_containment_backend() -> ContainmentBackend:
+    if sys.platform == "darwin":
+        return MacOSSandboxBackend()
+    return UnavailableContainmentBackend()
 
 
 class CommandArtifact(FrozenModel):
@@ -67,12 +426,17 @@ class TrustedCommand(FrozenModel):
 
     argv: tuple[str, ...]
     artifacts: tuple[CommandArtifact, ...]
+    literal_argument_indexes: tuple[int, ...] = ()
 
     @field_validator("argv")
     @classmethod
     def require_fixed_absolute_command(cls, value: tuple[str, ...]) -> tuple[str, ...]:
         if not value or any(not part or "\0" in part for part in value):
             raise ValueError("trusted command must be a nonempty argument array")
+        if len(value) > MAX_COMMAND_ARGUMENTS or sum(
+            len(argument.encode("utf-8")) for argument in value
+        ) > MAX_COMMAND_ARGV_BYTES:
+            raise ValueError("trusted command argument vector exceeds its deterministic bound")
         if not Path(value[0]).is_absolute():
             raise ValueError("trusted command executable must be an absolute path")
         return value
@@ -82,15 +446,43 @@ class TrustedCommand(FrozenModel):
     def normalize_artifacts(
         cls, value: tuple[CommandArtifact, ...]
     ) -> tuple[CommandArtifact, ...]:
+        if len(value) > MAX_COMMAND_ARTIFACTS:
+            raise ValueError("trusted command may attest at most 64 artifacts")
         paths = [artifact.path for artifact in value]
         if len(paths) != len(set(paths)):
             raise ValueError("trusted command artifact paths must be unique")
         return tuple(sorted(value, key=lambda artifact: artifact.path))
 
+    @field_validator("literal_argument_indexes")
+    @classmethod
+    def normalize_literal_argument_indexes(cls, value: tuple[int, ...]) -> tuple[int, ...]:
+        if any(index <= 0 for index in value) or len(value) != len(set(value)):
+            raise ValueError("literal argument indexes must be unique positive indexes")
+        return tuple(sorted(value))
+
     @model_validator(mode="after")
     def require_complete_attestation(self) -> "TrustedCommand":
         required_paths = {argument for argument in self.argv if Path(argument).is_absolute()}
         artifact_paths = {artifact.path for artifact in self.artifacts}
+        nonabsolute_indexes = {
+            index
+            for index, argument in enumerate(self.argv)
+            if index > 0 and not Path(argument).is_absolute()
+        }
+        if set(self.literal_argument_indexes) != nonabsolute_indexes:
+            raise ValueError(
+                "every non-absolute command argument must be explicitly classified as literal"
+            )
+        if any(
+            len(self.argv[index]) > MAX_LITERAL_ARGUMENT_CHARS
+            or re.fullmatch(
+                r"(?:--?[a-z0-9][a-z0-9-]*|[a-z0-9][a-z0-9_-]*|[0-9]+)",
+                self.argv[index],
+            )
+            is None
+            for index in self.literal_argument_indexes
+        ):
+            raise ValueError("literal command arguments must use the bounded opaque-token syntax")
         if self.argv[0] not in artifact_paths:
             raise ValueError("trusted command executable must have an artifact attestation")
         if artifact_paths != required_paths:
@@ -112,7 +504,12 @@ class TrustedCommand(FrozenModel):
         return resolved, f"sha256:{digest.hexdigest()}", file_stat
 
     @classmethod
-    def attest(cls, argv: tuple[str, ...]) -> "TrustedCommand":
+    def attest(
+        cls,
+        argv: tuple[str, ...],
+        *,
+        literal_argument_indexes: tuple[int, ...] = (),
+    ) -> "TrustedCommand":
         if not argv or any(not part or "\0" in part for part in argv):
             raise ValueError("trusted command must be a nonempty argument array")
         if not Path(argv[0]).is_absolute():
@@ -136,7 +533,11 @@ class TrustedCommand(FrozenModel):
                     size=file_stat.st_size,
                 )
             )
-        return cls(argv=argv, artifacts=tuple(artifacts))
+        return cls(
+            argv=argv,
+            artifacts=tuple(artifacts),
+            literal_argument_indexes=literal_argument_indexes,
+        )
 
     def verify(self) -> bool:
         for artifact in self.artifacts:
@@ -162,13 +563,6 @@ class TrustedCommand(FrozenModel):
         return tuple(resolved_by_path.get(argument, argument) for argument in self.argv)
 
 
-def _apply_child_limits() -> None:
-    """Apply limits in the child after Popen forks and before it execs."""
-
-    resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
-    resource.setrlimit(resource.RLIMIT_NPROC, (0, 0))
-
-
 @dataclass
 class _BoundedCapture:
     data: bytearray = field(default_factory=bytearray)
@@ -192,9 +586,13 @@ class SubprocessAdapter:
         max_output_bytes: int = 1_000_000,
         max_input_bytes: int = 1_000_000,
         environment_allowlist: tuple[str, ...] = ("LANG", "LC_ALL", "TZ"),
+        containment_backend: ContainmentBackend | None = None,
+        allowed_read_paths: tuple[Path, ...] = (),
+        allowed_write_paths: tuple[Path, ...] = (),
     ) -> None:
         if not working_directory.is_dir():
             raise ValueError("subprocess working directory must exist")
+        resolved_working_directory = working_directory.resolve()
         if (
             isinstance(timeout_seconds, bool)
             or not isinstance(timeout_seconds, (int, float))
@@ -211,14 +609,23 @@ class SubprocessAdapter:
             or max_input_bytes <= 0
         ):
             raise ValueError("subprocess input and output bounds must be positive")
-        if not set(environment_allowlist) <= SAFE_ENVIRONMENT_KEYS:
+        if not set(environment_allowlist) <= DETERMINISTIC_ENVIRONMENT.keys():
             raise ValueError("subprocess environment allowlist contains an unsafe key")
         self._trusted_command = trusted_command
-        self._working_directory = working_directory.resolve()
+        self._working_directory = resolved_working_directory
         self._timeout_seconds = timeout_seconds
         self._max_output_bytes = max_output_bytes
         self._max_input_bytes = max_input_bytes
         self._environment_allowlist = tuple(sorted(set(environment_allowlist)))
+        self._containment_backend = (
+            _platform_containment_backend()
+            if containment_backend is None
+            else containment_backend
+        )
+        self._allowed_read_paths = tuple(PathAllowance.attest(path) for path in allowed_read_paths)
+        self._allowed_write_paths = tuple(
+            PathAllowance.attest(path) for path in allowed_write_paths
+        )
         self._diagnostics: list[FailureDiagnostic] = []
 
     @property
@@ -227,6 +634,12 @@ class SubprocessAdapter:
 
     def run(self, request: AgentRequest) -> AgentResponse:
         self._diagnostics.clear()
+        if not self._containment_backend.available:
+            return self._failure(
+                request,
+                ProtocolFailureCode.CONTAINMENT_UNAVAILABLE,
+                "required subprocess containment backend is unavailable",
+            )
         if not self._trusted_command.verify():
             return self._failure(
                 request,
@@ -242,13 +655,18 @@ class SubprocessAdapter:
             )
 
         environment = {
-            key: os.environ[key]
-            for key in self._environment_allowlist
-            if key in os.environ
+            key: DETERMINISTIC_ENVIRONMENT[key] for key in self._environment_allowlist
         }
+        prepared: PreparedExecution | None = None
         try:
+            prepared = self._containment_backend.prepare(
+                trusted_command=self._trusted_command,
+                working_directory=self._working_directory,
+                allowed_read_paths=self._allowed_read_paths,
+                allowed_write_paths=self._allowed_write_paths,
+            )
             process = subprocess.Popen(
-                list(self._trusted_command.execution_argv()),
+                list(prepared.argv),
                 shell=False,
                 cwd=self._working_directory,
                 env=environment,
@@ -257,7 +675,14 @@ class SubprocessAdapter:
                 stderr=subprocess.PIPE,
                 close_fds=True,
                 start_new_session=True,
-                preexec_fn=_apply_child_limits,
+                pass_fds=prepared.pass_fds,
+            )
+        except ContainmentPreparationError as error:
+            return self._failure(
+                request,
+                ProtocolFailureCode.CONTAINMENT_UNAVAILABLE,
+                "required subprocess containment could not be prepared",
+                str(error),
             )
         except (OSError, subprocess.SubprocessError) as error:
             return self._failure(
@@ -266,6 +691,9 @@ class SubprocessAdapter:
                 "agent subprocess could not start",
                 str(error),
             )
+        finally:
+            if prepared is not None:
+                prepared.close()
 
         assert process.stdin is not None
         assert process.stdout is not None

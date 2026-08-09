@@ -30,6 +30,7 @@ class ProtocolFailureCode(StrEnum):
     UNDECLARED_FILE_ACCESS = "UndeclaredFileAccess"
     PROTOCOL_VIOLATION = "ProtocolViolation"
     EXECUTION_ERROR = "ExecutionError"
+    CONTAINMENT_UNAVAILABLE = "ContainmentUnavailable"
 
 
 class ProtocolFailure(FrozenModel):

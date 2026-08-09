@@ -1,10 +1,10 @@
 # AIRE v0.1 Status and Roadmap
 
-**Status date:** 2026-08-06
+**Status date:** 2026-08-07
 
 **Implementation branch:** `feature/aire-v0.1`
 
-**Reviewed implementation baseline:** `babd013`
+**Reviewed implementation baseline:** Task 7 containment phase (see `PROGRESS.md` for pushed commit)
 
 ## Evidence boundary
 
@@ -12,10 +12,11 @@ Tasks 1--7 now have deterministic, typed implementations for object representati
 realization, append-only evidence, and isolated-role exchange. Fresh recovery verification produced
 168 passing tests plus Ruff, strict mypy, deterministic JSON Schema export, and clean diff checks.
 
-The Tasks 5--7 goal is still **blocked**. The Task 7 subprocess adapter enforces a fixed attested
-command, minimal environment, no-fork child limit, bounded I/O, timeout, process-group termination,
-reference-only wire packets, and typed failures. It is not an OS sandbox: the approved child can
-still issue filesystem and network syscalls. See `REVIEW.md` and `DECISIONS.md`.
+The Tasks 5--7 substrate gate is **green on its declared host boundary**: macOS 27 arm64 with a
+passing functional Seatbelt probe. Other hosts fail closed. The Task 7 adapter enforces immutable
+artifact snapshots, explicit bounded literals, deterministic environment, filesystem allowlists,
+network/fork denial, resource and descriptor bounds, process-group termination, reference-only
+wire packets, and typed failures. See `REVIEW.md` and D-007--D-009 for exact limitations.
 
 This is infrastructure evidence, not experimental evidence. It does not demonstrate:
 
@@ -88,20 +89,21 @@ These tasks should tell us whether AIRE is safe and auditable enough to begin ex
 not themselves prove capability or sense transfer.
 
 Task 5 is committed at `8777470`, Task 6 at `7764155`, the initial Task 7 implementation at
-`13cd8fa`, and recovered Task 7 hardening at `babd013`. Automated specification and quality checks
-are green, but the independent security gate remains red because host filesystem/network
-containment and the residual verify-to-exec race are unresolved.
+`13cd8fa`, and recovered Task 7 hardening at `babd013`. The final containment checkpoint and remote
+verification are recorded in `PROGRESS.md`. Repeated specification, security, and test-gap reviews
+found no unresolved Critical issue inside the approved threat model.
 
-## Recovery verification evidence
+## Task 7 verification evidence
 
-On 2026-08-06, from the durable feature worktree:
+The pre-containment recovery baseline was 36 focused and 168 full tests. The completed Task 7
+surface adds functional and hostile-child integration for platform refusal, file contents and
+metadata, writes, network address classes, forks, descriptors, executable replacement, artifact
+and allowlist races, resource ceilings, deterministic environment, and JSONL exchange. Exact final
+counts and commands are recorded in `PROGRESS.md`.
 
-- focused Task 7 tests: 36 passed;
-- full suite: 168 passed;
-- Ruff: passed;
-- strict mypy: passed across 25 source files;
-- deterministic schema check: passed;
-- diff check: passed.
+- focused Task 7 suite: green with real containment integrations executed;
+- complete suite, Ruff, strict mypy, deterministic schema check, and diff check: green at the
+  phase checkpoint.
 
 The original four local-only commits were backed up to GitHub before reconstruction. The recovered
 test patch was observed RED before implementation was replayed. No test was skipped, weakened, or
@@ -151,7 +153,7 @@ would remain simulator-level.
 
 ## Current next action
 
-Complete Task 7 host containment and eliminate or explicitly accept the remaining verify-to-exec
-and `preexec_fn` risks under [`GOAL_NEXT_TASKS_GROUP.md`](../GOAL_NEXT_TASKS_GROUP.md). Repeat the
-independent security review and full verification afterward. Do not begin E1 or E2 until the
-Tasks 5--7 security gate passes.
+Begin Task 8 E1 capability reconstruction under
+[`GOAL_REMAINING_STEPS.md`](../GOAL_REMAINING_STEPS.md), using only the now-contained Task 7
+boundary. E1 remains simulated protocol evidence and must not be described as alien-sense,
+physical, QEC, superintelligence, or new-physics evidence.

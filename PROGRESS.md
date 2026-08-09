@@ -94,3 +94,29 @@ Do not begin Task 8, E1, E2, CLI, provider, physical, or deployment work.
   parent checkout; the recovery baseline and its history are distinct from AIRE Prime.
 - Next action: begin Task 7 containment RED tests. Task 8 remains gated until Task 7 security,
   review, and full-verification evidence are green.
+
+## 2026-08-07 Task 7 Host Containment
+
+- Added a fail-closed containment backend. Production support is deliberately limited to macOS 27
+  arm64 with a successful functional Seatbelt probe; every other environment returns typed
+  `ContainmentUnavailable` evidence without executing the child.
+- Replaced mutable verify-then-path execution with verified, read-only, unlinked artifact snapshots
+  passed by descriptor. Absolute artifacts bind digest/path/device/inode/size; nonabsolute tokens
+  require explicit bounded-literal classification. Process execution is restricted to the
+  attested executable and reviewed shell launcher variants.
+- Removed `preexec_fn`. The reviewed launcher applies core, process, CPU, file-size, and open-file
+  limits before the attested executable, while the adapter retains wall-time, input/output,
+  artifact/argv, environment, descriptor-inheritance, and process-group bounds.
+- Bound read/write allowances to resolved path/type/device/inode and re-verify them before profile
+  construction. Explicit hostile fixtures prove undeclared content and metadata denial, declared
+  reads/writes, write denial, loopback/local-interface/routed-nonlocal network denial, fork denial,
+  descriptor isolation/exhaustion, executable replacement denial, immutable snapshots, and
+  canonical JSONL exchange.
+- Conducted specification/code-quality, security, and test-gap reviews in repeated rounds. All
+  Critical findings were accepted and resolved. Important findings were resolved or explicitly
+  adjudicated in `REVIEW.md` and D-007--D-009; residual `system.sb`, same-UID race, and memory-limit
+  boundaries remain stated limitations rather than erased threats.
+- Focused containment evidence: 63 tests collected. Final full commands and phase commit IDs will
+  be recorded after the clean verification and push checkpoint.
+- Next action: complete Task 7 full verification, commit, push, and verify the remote head. Task 8
+  remains gated until that checkpoint is durable.
