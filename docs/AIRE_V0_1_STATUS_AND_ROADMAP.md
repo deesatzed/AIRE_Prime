@@ -4,13 +4,14 @@
 
 **Implementation branch:** `feature/aire-v0.1`
 
-**Reviewed implementation baseline:** `b19cfb3` (Task 7 containment implementation and review)
+**Reviewed implementation baseline:** Task 8 E1 phase ready for its published checkpoint
 
 ## Evidence boundary
 
-Tasks 1--7 now have deterministic, typed implementations for object representation, bounded GRO
-realization, append-only evidence, and isolated-role exchange. Fresh recovery verification produced
-168 passing tests plus Ruff, strict mypy, deterministic JSON Schema export, and clean diff checks.
+Tasks 1--8 now have deterministic, typed implementations for object representation, bounded GRO
+realization, append-only evidence, isolated-role exchange, and simulated E1 capability transfer.
+The Task 8 checkpoint gate produced 203 passing tests plus Ruff, strict mypy, deterministic JSON
+Schema export, clean diff checks, and byte-identical independent seed-101 evidence runs.
 
 The Tasks 5--7 substrate gate is **green on its declared host boundary**: macOS 27 arm64 with a
 passing functional Seatbelt probe. Other hosts fail closed. The Task 7 adapter enforces immutable
@@ -109,7 +110,8 @@ The original four local-only commits were backed up to GitHub before reconstruct
 test patch was observed RED before implementation was replayed. No test was skipped, weakened, or
 deleted to obtain the green result.
 
-These are infrastructure checks only. E1 and E2 have not been implemented or demonstrated.
+Task 7 remains infrastructure evidence. Task 8 now adds reproducible simulated E1 protocol
+evidence; E2 has not been implemented or demonstrated.
 
 ### Experimental proof -- Tasks 8--10
 
@@ -118,6 +120,11 @@ These are infrastructure checks only. E1 and E2 have not been implemented or dem
    Does a bounded GRO let a fresh recipient reconstruct, adapt, compose, and repair a capability
    under changed resources better than bandwidth-matched frozen alternatives? Passing supports
    only the claim that the object-transfer protocol works.
+
+   **Current evidence:** green. A fresh contained receiver handles three separately committed
+   tasks after receiving a hidden-test-free capability packet. Five precommitted executable
+   alternatives receive identical packet, task, interaction, and transmitted-byte budgets. The
+   seed-101 report is deterministic and classified only as `simulated-capability-transfer`.
 
 5. **Task 9: Measurement Layer Zero**
 
@@ -153,7 +160,6 @@ would remain simulator-level.
 
 ## Current next action
 
-Begin Task 8 E1 capability reconstruction under
-[`GOAL_REMAINING_STEPS.md`](../GOAL_REMAINING_STEPS.md), using only the now-contained Task 7
-boundary. E1 remains simulated protocol evidence and must not be described as alien-sense,
-physical, QEC, superintelligence, or new-physics evidence.
+After publishing and verifying the Task 8 checkpoint, begin Task 9 Measurement Layer Zero under
+[`GOAL_REMAINING_STEPS.md`](../GOAL_REMAINING_STEPS.md). E1 remains simulated protocol evidence and
+must not be described as alien-sense, physical, QEC, superintelligence, or new-physics evidence.

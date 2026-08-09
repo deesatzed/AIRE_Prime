@@ -127,3 +127,40 @@ Do not begin Task 8, E1, E2, CLI, provider, physical, or deployment work.
   - `git diff --check` -> exit 0.
 - Next action: push the Task 7 checkpoint and confirm the remote head equals the local evidence
   commit, then begin Task 8 E1. No experiment work began while the containment gate was red.
+
+## 2026-08-07 Task 8 E1 Capability Reconstruction
+
+- Implemented the deterministic seed-driven E1 procedural world with typed components, ports,
+  local resource constraints, construction costs, changed-resource transfer, composition,
+  single-component repair, and validator-only conformance details.
+- The recipient-visible capability packet excludes hidden conformance names and downstream task
+  labels. Three later canonical task requests independently ask a fresh contained receiver to
+  transfer, compose, and repair; returned reference-only artifact IDs are checked by the hidden
+  parent validator.
+- Added five distinct executable frozen alternatives: fixed instance, demonstration list, lookup
+  policy, deterministic opaque packet, and conventional feature schema. Their packet commitments
+  are bound into the Evaluation Contract before execution. Every arm receives the same three-task
+  schedule, 2,171-byte packet budget per interaction, interaction count, and aggregate transmitted
+  input budget; observed failures are retained rather than assigned in advance.
+- E1 emits and registers the capability packet, task packets, requests, responses, baseline packet
+  commitments/results, Reality Object, Evaluation Contract, Bridge Contract, GRC kernel-smoke
+  receipts, Occurrence Report, Improvement Report, and final E1 report. `SenseProposal` remains
+  absent because E1 does not claim a new distinction.
+- Three review rounds initially found hidden-test leakage, unevaluated labeled baselines,
+  parent-only task execution, weak identity/conformance checks, incomplete lineage, post-observation
+  baseline binding, disclosed downstream goals, and unmatched resource accounting. All findings
+  were accepted and resolved. Final review verdict: Ready, with no remaining findings.
+- Final local verification from the durable feature worktree:
+  - `PYTHONDONTWRITEBYTECODE=1 uv run pytest -q tests/experiments/e1` -> 8 passed;
+  - `PYTHONDONTWRITEBYTECODE=1 uv run pytest -q` -> 203 passed;
+  - `uv run ruff check .` -> all checks passed;
+  - `uv run mypy aire_prime` -> success in 31 source files;
+  - `uv run python scripts/export_schemas.py --check` -> exit 0;
+  - `git diff --check` -> exit 0.
+- Two independent seed-101 runs were byte-identical. Both report content ID
+  `sha256:b709fbf42e25d2a8db6e4244472b739503e2d4fb458967bcc2080ddbf3348813`;
+  report-file SHA-256 is `729363194ec8023dd08d8631aca5feaea2b626b4543a6d399a24cb3703501f7a`;
+  registry-file SHA-256 is `e64a3db081bde8eb2ffd68349630619fca7c8767ba8a6bf9ba8d9afeb7bb16ff`.
+- The passing classification is only `simulated-capability-transfer`. It is not physical, QEC,
+  alien-sense, superintelligence, or new-physics evidence. Next action after remote verification:
+  begin Task 9 Measurement Layer Zero.

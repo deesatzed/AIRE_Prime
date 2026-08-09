@@ -99,3 +99,20 @@ made equivalent with this backend.
 **Consequence:** Allowance path/type/device/inode changes before preparation fail closed, and
 artifact races are closed. Stronger same-UID concurrency protection and a native memory-limiting
 launcher remain future hardening, not claims of this v0.1 boundary.
+
+## D-010: Separate E1 capability transfer, task disclosure, and hidden validation
+
+**Decision:** Freeze and content-address the E1 capability packet without downstream task labels or
+hidden conformance details. Bind five byte-matched baseline packet commitments into the Evaluation
+Contract before observation, then give the proposal and every baseline the same three separately
+committed task requests through the Task 7 contained receiver. Treat GRC realization receipts as
+kernel-smoke evidence, not as proof of the returned constructions.
+
+**Reason:** A preprogrammed recipient, post-observation control selection, leaked validator details,
+or unequal interaction/bandwidth schedules would make the simulated transfer classification
+scientifically unsupported even if deterministic tests passed.
+
+**Consequence:** E1 may report simulated capability transfer only when contained response artifact
+IDs pass independent hidden validation and every matched alternative fails under identical declared
+input-byte and interaction budgets. Failed gates downgrade the classification and remain in the
+canonical evidence.
