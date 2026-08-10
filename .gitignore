@@ -1,0 +1,6 @@
+.DS_Store
+.coverage
+htmlcov/
+dist/
+__pycache__/
+*.py[cod]

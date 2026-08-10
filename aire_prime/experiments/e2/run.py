@@ -605,13 +605,19 @@ def run_e2(*, seed: int, output: Path, forced_failures: tuple[str, ...] = ()) ->
         (output / f"ablation_{index}_response.jsonl").write_bytes(
             ablation_exchange.response.to_jsonl()
         )
-    _write(output / "measurement_decision.json", measurement_decision.model_dump(mode="json"))
-    _write(output / "baseline_results.json", [b.model_dump(mode="json") for b in baselines])
-    _write(output / "ablation_evidence.json", ablation.model_dump(mode="json"))
+    _write(output / "measurement_decision.json", measurement_decision)
+    _write(
+        output / "baseline_results.json",
+        [b.model_dump(mode="json", exclude_computed_fields=True) for b in baselines],
+    )
+    _write(
+        output / "ablation_evidence.json",
+        ablation.model_dump(mode="json", exclude_computed_fields=True),
+    )
     _write(output / "realization_receipts.json", [r.model_dump(mode="json") for r in receipts])
     registry = RegistryStore(output / "registry.jsonl", clock=lambda: created_at)
     payloads = tuple(
-        value.model_dump(mode="json", exclude_computed_fields=True) for _, value in objects
+        json.loads(canonical_bytes(value.identity_payload())) for _, value in objects
     ) + (
         world.model_dump(mode="json"),
         reproduction_world.model_dump(mode="json"),
@@ -627,8 +633,8 @@ def run_e2(*, seed: int, output: Path, forced_failures: tuple[str, ...] = ()) ->
         reproduction.request.model_dump(mode="json", exclude_computed_fields=True),
         reproduction.response.model_dump(mode="json", exclude_computed_fields=True),
         reproduction_packet,
-        measurement_decision.model_dump(mode="json"),
-        ablation.model_dump(mode="json"),
+        json.loads(canonical_bytes(measurement_decision)),
+        ablation.model_dump(mode="json", exclude_computed_fields=True),
         *(json.loads(canonical_bytes(control)) for control in controls),
         *(control_packet for _, control_packet in baseline_packets),
         *(ablation_packet for _, _, ablation_packet in ablation_packets),
@@ -648,7 +654,7 @@ def run_e2(*, seed: int, output: Path, forced_failures: tuple[str, ...] = ()) ->
                 ablation_exchange.response.model_dump(mode="json", exclude_computed_fields=True),
             )
         ),
-        *(b.model_dump(mode="json") for b in baselines),
+        *(b.model_dump(mode="json", exclude_computed_fields=True) for b in baselines),
         *(r.model_dump(mode="json") for r in receipts),
     )
     for payload in payloads:

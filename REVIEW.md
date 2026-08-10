@@ -100,3 +100,24 @@ resolved as follows:
 **Final verdict: Ready.** No Critical or Important findings remain. Task 10 is ready as an honest,
 deterministic, simulated negative/undetermined result—not established alien-sense transfer and not
 physical, QEC, superintelligence, or new-physics evidence.
+
+## Task 11 CLI and evidence-inspection review
+
+Independent read-only review challenged the packaged CLI, exact E1/E2 manifests, installed-wheel
+behavior, and fail-closed evidence inspection.
+
+- **Accepted / resolved:** E1 now persists and canonically registers its procedural world; E2
+  persists and canonically registers its measurement decision; both report identities resolve to
+  the exact canonical bytes stored in the registry.
+- **Accepted / resolved:** inspection validates typed scientific objects and contracts, linked
+  request/response identities, response success, complete receipt coverage, exact manifest counts,
+  grounding ceilings, and registry resolution rather than trusting summary fields.
+- **Accepted / resolved:** root schemas are force-included in the built wheel and loaded through
+  package resources. The install test proves the console entry point and schema check work from a
+  temporary environment outside the repository.
+- **Accepted / resolved:** negative tests cover missing responses and receipts, substituted
+  decisions and scientific objects, malformed metric and contract evidence, unregistered or
+  mislinked responses, physical-grounding escalation, and contained resource failures.
+
+**Final verdict: Ready.** No Critical or Important findings remain. Task 11 is suitable to commit
+and proceed to the Task 12 adversarial release review.

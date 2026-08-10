@@ -1,5 +1,6 @@
 import argparse
 import hashlib
+import json
 import tempfile
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -661,6 +662,7 @@ def run_e1(*, seed: int, output: Path) -> E1RunResult:
     )
     for filename, value in objects:
         _write_object(output / filename, value)
+    _write_object(output / "world.json", world)
     _write_object(
         output / "realization_receipts.json",
         [receipt.model_dump(mode="json") for receipt in receipts],
@@ -691,11 +693,12 @@ def run_e1(*, seed: int, output: Path) -> E1RunResult:
         registry.append(
             actor_role="validator",
             actor_id="agent:e1-validator",
-            object_payload=value.model_dump(mode="json", exclude_computed_fields=True),
+            object_payload=json.loads(canonical_bytes(value.identity_payload())),
             event_type=LifecycleState.DRAFT,
             event_payload={"experiment": "E1", "seed": seed},
         )
     supporting_payloads = [
+        json.loads(canonical_bytes(world)),
         transfer_packet_payload,
         *task_payloads,
         tasks.model_dump(mode="json"),

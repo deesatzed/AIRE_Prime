@@ -165,3 +165,20 @@ claims.
 **Consequence:** The E2 evidence packet is independently inspectable and fail-closed. A refused
 execution or wrong artifact cannot be scored, and changing only control provenance changes the
 decision identity.
+
+## D-014: Treat the CLI artifact manifest as a closed evidence boundary
+
+**Decision:** Each E1/E2 CLI run emits an exact, experiment-specific manifest. Inspection parses
+every scientific object and contract, verifies every request/response pair and realization
+receipt, resolves all referenced content identities through the tamper-evident registry, and
+rejects missing or substituted artifacts. Installed schema checks use schemas packaged in the
+wheel rather than depending on repository-relative files.
+
+**Reason:** A convenient report viewer that trusts a top-level summary could accept incomplete,
+unregistered, physically overclaimed, or internally inconsistent evidence. Repository-relative
+schema access would also make a nominally packaged CLI non-reproducible outside the checkout.
+
+**Consequence:** Adding or removing an output artifact is a protocol change that must update the
+manifest and its negative tests. Canonical registry serialization may supersede historical
+registry-file hashes, but published report identities and scientific conclusions cannot be
+silently rewritten.

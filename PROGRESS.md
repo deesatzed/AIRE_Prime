@@ -241,3 +241,36 @@ Do not begin Task 8, E1, E2, CLI, provider, physical, or deployment work.
 - Next action after commit/push verification: Task 11 CLI, evidence inspection, and end-to-end
   reproduction. Task 10 establishes a reproducible bounded negative/undetermined result, not E2
   improvement, physical grounding, QEC improvement, superintelligence, or new physics.
+
+## 2026-08-07 — Task 11 CLI and end-to-end reproduction complete
+
+- Added the packaged `aire-prime` entry point with the exact schema-check, E1/E2 run, registry
+  verification, and report-inspection commands required by the canonical plan.
+- The inspector validates the complete fixed artifact manifest, typed contracts and reports,
+  request/response/receipt lineage, registry membership, response success, and the v0.1 simulated
+  grounding ceiling. Missing, substituted, corrupt, failed, unregistered, or physically grounded
+  evidence fails closed.
+- Root JSON Schemas are force-included in the wheel and resolved through package resources when
+  installed. A wheel test builds, installs, and exercises the CLI outside the source checkout.
+- E1 now persists and registers its procedural world. E1 and E2 register canonical report and
+  decision bytes, so the report identities shown by the CLI resolve exactly through the registry.
+- Final verification from the durable feature worktree:
+  - `.venv/bin/python -m pytest -q` -> 251 passed;
+  - coverage -> 91.89%, above the 90% gate;
+  - `ruff check .` -> all checks passed;
+  - `mypy aire_prime` -> success in 46 source files;
+  - `.venv/bin/python scripts/export_schemas.py --check` -> exit 0;
+  - `git diff --check` -> exit 0.
+- The exact README workflow completed successfully. E1 reported
+  `simulated-capability-transfer`, `O4/G-S`, report ID
+  `sha256:b709fbf42e25d2a8db6e4244472b739503e2d4fb458967bcc2080ddbf3348813`, registry head
+  `sha256:f2ee52c431986a2761bfd7dea17df16e2c75c7ca132d7d5596b10eb5f8a912b5`.
+  E2 retained `simulated-alien-sense-transfer-not-established`, `O0/G-S`, report ID
+  `sha256:3f60ac64e2190fbdd0705e8ef6bad7e8a701e9a42087a82a32d1afeb695a81bc`, registry head
+  `sha256:026454dd53f2fd1c6363b7ad4213f0fcf5a0ba2257aa73e9619aa68542d4c314`.
+- Task 11's canonical registry linkage intentionally changes regenerated registry heads and file
+  hashes from earlier phase snapshots. Earlier Task 8/10 values remain historical checkpoint
+  evidence; the scientific report IDs and Task 10 negative/undetermined conclusion are unchanged.
+- Independent read-only review verdict: Ready, with no Critical or Important findings remaining.
+- Next action after commit/push verification: Task 12 adversarial claim, packet-channel, and
+  metric-gaming review plus publication of `docs/AIRE_V0_1_EVIDENCE.md`.
