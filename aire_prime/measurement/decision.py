@@ -111,6 +111,7 @@ class ProtectedContract(FrozenModel):
 
 class ControlSamples(NamedSamples):
     control_arm_id: ContentID
+    measurement_artifact_id: ContentID
     candidate_arm: ComparisonArm
     control_arm: ComparisonArm
     declared_adjustments: tuple[DeclaredAdjustment, ...] = ()
@@ -181,6 +182,7 @@ class ImprovementDecision(FrozenModel):
     control_contract_id: ContentID
     protected_contract_id: ContentID
     candidate_samples_id: ContentID
+    control_samples_ids: tuple[ContentID, ...]
     comparison_ids: tuple[str, ...]
     proposed_summary: BootstrapSummary | None = None
     control_summaries: tuple[BootstrapSummary, ...] = ()
@@ -191,13 +193,9 @@ class ImprovementDecision(FrozenModel):
     @model_validator(mode="after")
     def require_status_evidence(self) -> Self:
         summaries_present = self.proposed_summary is not None and self.margin_summary is not None
-        if self.status is DecisionStatus.PROVISIONAL and (
-            not summaries_present or self.reasons
-        ):
+        if self.status is DecisionStatus.PROVISIONAL and (not summaries_present or self.reasons):
             raise ValueError("provisional decision requires summaries and no failure reasons")
-        if self.status is DecisionStatus.REJECTED and (
-            not summaries_present or not self.reasons
-        ):
+        if self.status is DecisionStatus.REJECTED and (not summaries_present or not self.reasons):
             raise ValueError("rejected decision requires summaries and failure reasons")
         if self.status is DecisionStatus.UNDETERMINED and not self.reasons:
             raise ValueError("undetermined decision requires reasons")
@@ -266,6 +264,9 @@ def decide_improvement(
         raise ValueError("control arm IDs must be unique")
     if len({item.name for item in protected_dimensions}) != len(protected_dimensions):
         raise ValueError("protected dimension names must be unique")
+    control_samples_ids = tuple(
+        control.content_id for control in sorted(controls, key=lambda item: item.name)
+    )
 
     supplied_ids = {control.control_arm_id for control in controls}
     required_ids = set(control_contract.required_control_ids)
@@ -280,6 +281,7 @@ def decide_improvement(
             control_contract_id=control_contract.content_id,
             protected_contract_id=protected_contract.content_id,
             candidate_samples_id=candidate_samples.content_id,
+            control_samples_ids=control_samples_ids,
             comparison_ids=(),
             reasons=(
                 *(f"missing-control:{control_id}" for control_id in missing),
@@ -287,9 +289,7 @@ def decide_improvement(
             ),
         )
     invalid_comparisons = tuple(
-        control
-        for control in controls
-        if control.comparison.status is not ComparisonStatus.VALID
+        control for control in controls if control.comparison.status is not ComparisonStatus.VALID
     )
     comparison_ids = tuple(
         control.comparison.content_id for control in sorted(controls, key=lambda item: item.name)
@@ -304,6 +304,7 @@ def decide_improvement(
             control_contract_id=control_contract.content_id,
             protected_contract_id=protected_contract.content_id,
             candidate_samples_id=candidate_samples.content_id,
+            control_samples_ids=control_samples_ids,
             comparison_ids=comparison_ids,
             reasons=("inconsistent-candidate-arms",),
         )
@@ -316,13 +317,13 @@ def decide_improvement(
             control_contract_id=control_contract.content_id,
             protected_contract_id=protected_contract.content_id,
             candidate_samples_id=candidate_samples.content_id,
+            control_samples_ids=control_samples_ids,
             comparison_ids=comparison_ids,
             reasons=("candidate-samples-arm-mismatch",),
         )
     supplied_protected = {item.name: item.floor for item in protected_dimensions}
     required_protected = {
-        requirement.name: requirement.floor
-        for requirement in protected_contract.requirements
+        requirement.name: requirement.floor for requirement in protected_contract.requirements
     }
     if supplied_protected != required_protected:
         missing = tuple(sorted(set(required_protected) - set(supplied_protected)))
@@ -342,6 +343,7 @@ def decide_improvement(
             control_contract_id=control_contract.content_id,
             protected_contract_id=protected_contract.content_id,
             candidate_samples_id=candidate_samples.content_id,
+            control_samples_ids=control_samples_ids,
             comparison_ids=comparison_ids,
             reasons=(
                 *(f"missing-protected:{name}" for name in missing),
@@ -358,6 +360,7 @@ def decide_improvement(
             control_contract_id=control_contract.content_id,
             protected_contract_id=protected_contract.content_id,
             candidate_samples_id=candidate_samples.content_id,
+            control_samples_ids=control_samples_ids,
             comparison_ids=comparison_ids,
             reasons=tuple(
                 f"resource-comparison-{control.name}-{control.comparison.status.value}"
@@ -378,6 +381,7 @@ def decide_improvement(
             control_contract_id=control_contract.content_id,
             protected_contract_id=protected_contract.content_id,
             candidate_samples_id=candidate_samples.content_id,
+            control_samples_ids=control_samples_ids,
             comparison_ids=comparison_ids,
             reasons=("missing-measurements",),
         )
@@ -388,15 +392,11 @@ def decide_improvement(
     )
     ordered_controls = tuple(sorted(controls, key=lambda control: control.name))
     control_effects = tuple(
-        _bootstrap_means(
-            control.samples, generator=generator, iterations=bootstrap_iterations
-        )
+        _bootstrap_means(control.samples, generator=generator, iterations=bootstrap_iterations)
         for control in ordered_controls
     )
     margin_effects = tuple(
-        proposed_effects[index]
-        - max(effects[index] for effects in control_effects)
-        - delta
+        proposed_effects[index] - max(effects[index] for effects in control_effects) - delta
         for index in range(bootstrap_iterations)
     )
     proposed_summary = _summary(
@@ -416,9 +416,7 @@ def decide_improvement(
         _summary(
             item.name,
             item.samples,
-            _bootstrap_means(
-                item.samples, generator=generator, iterations=bootstrap_iterations
-            ),
+            _bootstrap_means(item.samples, generator=generator, iterations=bootstrap_iterations),
             alpha=alpha,
         )
         for item in sorted(protected_dimensions, key=lambda protected: protected.name)
@@ -428,8 +426,7 @@ def decide_improvement(
         reasons.append("effect-not-beyond-maximum-control")
     floors = {item.name: item.floor for item in protected_dimensions}
     if any(
-        summary.lower_confidence_bound < floors[summary.name]
-        for summary in protected_summaries
+        summary.lower_confidence_bound < floors[summary.name] for summary in protected_summaries
     ):
         reasons.append("protected-dimension-regression")
     return ImprovementDecision(
@@ -440,6 +437,7 @@ def decide_improvement(
         control_contract_id=control_contract.content_id,
         protected_contract_id=protected_contract.content_id,
         candidate_samples_id=candidate_samples.content_id,
+        control_samples_ids=control_samples_ids,
         comparison_ids=comparison_ids,
         proposed_summary=proposed_summary,
         control_summaries=control_summaries,

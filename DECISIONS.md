@@ -133,3 +133,35 @@ resource mismatches.
 candidate/control measurement evidence. Adjustments are bounded, structured, content-addressed,
 and limited to resource dimensions; observation access and receiver priors remain hard matching
 boundaries.
+
+## D-012: Preserve E2 as an honest undetermined result
+
+**Decision:** Publish the reproducible Task 10 experiment as `O0/G-S`, not `O4/G-S`. Successful
+contained discovery, fresh-recipient use, transformed behavior, causal-channel intervention, and
+distinct-seed reproduction do not override missing peak-RSS and elapsed-time observations. Those
+resource dimensions remain `undetermined`, so matched controls and provisional held-out gain fail.
+
+**Reason:** Treating timeout, I/O bounds, or invented constants as observed host usage would violate
+D-011 and turn deterministic formatting into false scientific evidence. The experiment must retain
+the strongest state actually supported by its complete resource contract.
+
+**Consequence:** Task 10 is complete as a bounded negative/undetermined experiment. A future attempt
+to establish `O4/G-S` must add credible, reproducible resource observation or an explicitly reviewed
+resource-allocation model, then rerun all precommitted controls. It may not reinterpret this packet
+after the fact.
+
+## D-013: Bind E2 controls and ablations to executable wire evidence
+
+**Decision:** Use a two-channel constructor with a causal output lookup and an inert executable
+lookup. Targeted intervention changes the causal channel; sham interventions change the known inert
+channel. Every baseline and ablation executes through the same contained recipient and retains its
+request, response, packet, per-episode samples, and registry object. Improvement decisions retain
+the exact control-sample content IDs.
+
+**Reason:** Differently named constant controls, hard-coded effect summaries, semantic no-op shams,
+or response hashes without resolvable wire artifacts cannot support causal or matched-control
+claims.
+
+**Consequence:** The E2 evidence packet is independently inspectable and fail-closed. A refused
+execution or wrong artifact cannot be scored, and changing only control provenance changes the
+decision identity.

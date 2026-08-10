@@ -69,6 +69,7 @@ def matched_control(
         name=name,
         samples=samples,
         control_arm_id=control_arm.content_id,
+        measurement_artifact_id=content_id({"control": name, "samples": samples}),
         candidate_arm=candidate,
         control_arm=control_arm,
         comparison=comparison,
@@ -102,9 +103,7 @@ def protected_measurement(
         name=name,
         samples=samples,
         floor=floor,
-        measurement_artifact_id=content_id(
-            {"name": name, "samples": samples, "floor": floor}
-        ),
+        measurement_artifact_id=content_id({"name": name, "samples": samples, "floor": floor}),
     )
 
 
@@ -211,9 +210,7 @@ def test_bootstrap_decision_is_deterministic_and_uses_maximum_control() -> None:
         ),
     )
     protected = (
-        protected_measurement(
-            name="safety", samples=(0.95, 0.96, 0.94, 0.95), floor=0.90
-        ),
+        protected_measurement(name="safety", samples=(0.95, 0.96, 0.94, 0.95), floor=0.90),
     )
 
     first = decide_improvement(
@@ -241,12 +238,35 @@ def test_bootstrap_decision_is_deterministic_and_uses_maximum_control() -> None:
 
     assert first == second
     assert first.status is DecisionStatus.PROVISIONAL
+    assert first.control_samples_ids == tuple(
+        control.content_id for control in sorted(controls, key=lambda item: item.name)
+    )
     assert len(first.margin_summary.sorted_bootstrap_effects) == 500
     assert tuple(result.name for result in first.control_summaries) == (
         "activation-permutation",
         "random-subspace",
         "replacement",
     )
+
+    changed_controls = (
+        controls[0].model_copy(
+            update={"measurement_artifact_id": content_id({"replacement-artifact": True})}
+        ),
+        *controls[1:],
+    )
+    changed = decide_improvement(
+        candidate_samples=candidate_measurements(candidate, (0.8, 0.9, 0.85, 0.88)),
+        controls=changed_controls,
+        control_contract=control_contract(changed_controls),
+        protected_dimensions=protected,
+        protected_contract=protected_contract(protected),
+        delta=0.10,
+        alpha=0.05,
+        seed=101,
+        bootstrap_iterations=500,
+    )
+    assert changed.control_samples_ids != first.control_samples_ids
+    assert changed.content_id != first.content_id
 
 
 def test_protected_regression_rejects_and_missing_samples_are_undetermined() -> None:
@@ -263,9 +283,7 @@ def test_protected_regression_rejects_and_missing_samples_are_undetermined() -> 
         controls=controls,
         control_contract=control_contract(controls),
         protected_dimensions=(
-            protected_measurement(
-                name="safety", samples=(0.5, 0.6, 0.5), floor=0.8
-            ),
+            protected_measurement(name="safety", samples=(0.5, 0.6, 0.5), floor=0.8),
         ),
         protected_contract=ProtectedContract(
             requirements=(ProtectedRequirement(name="safety", floor=0.8),)
@@ -329,6 +347,7 @@ def test_unfavorable_control_cannot_be_dropped_and_invalid_match_is_undetermined
             name=controls[0].name,
             samples=controls[0].samples,
             control_arm_id=invalid_control_arm.content_id,
+            measurement_artifact_id=controls[0].measurement_artifact_id,
             candidate_arm=candidate,
             control_arm=invalid_control_arm,
             comparison=compare_arms(candidate, invalid_control_arm),
@@ -454,9 +473,7 @@ def test_precommitted_failing_protected_dimension_cannot_be_omitted() -> None:
             candidate=candidate,
         ),
     )
-    contract = ProtectedContract(
-        requirements=(ProtectedRequirement(name="safety", floor=0.8),)
-    )
+    contract = ProtectedContract(requirements=(ProtectedRequirement(name="safety", floor=0.8),))
 
     decision = decide_improvement(
         candidate_samples=candidate_measurements(candidate, (0.9, 0.9, 0.9)),

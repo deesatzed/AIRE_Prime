@@ -201,3 +201,43 @@ Do not begin Task 8, E1, E2, CLI, provider, physical, or deployment work.
   measurement infrastructure; it does not itself establish E1/E2 improvement or physical evidence.
 - Task 9 phase commit `d0bd6c3943ebb0ebb6c34a89fd0f470e00ee1844` was pushed without
   force and resolved exactly from `origin/feature/aire-v0.1` before Task 10.
+
+## 2026-08-07 Task 10 E2 Simulated Alien-Sense Experiment
+
+- Implemented a deterministic binary causal world with separately committed train, validation,
+  hidden, and transformed splits. The discovery packet contains declared observations and complete
+  intervention outcomes, but no latent-class or optimal-action labels.
+- Froze both primary and distinct-seed reproduction worlds, candidate/reproduction packets and
+  tasks, three baseline packets, four ablation packets, evaluator, control contract, and protected
+  contract in the Evaluation Contract before any contained adapter call.
+- Added contained intervention-based discovery and a fresh contained recipient. Transfer uses only
+  a validated two-operation allow-listed constructor: one causal lookup and one inert executable
+  channel. The recipient validates the complete constrained constructor and executes both channels.
+- Added three distinct 4,096-byte executable alternatives: a fixed-action prior, an opaque
+  first-byte-parity control, and a conventional raw-observation lookup. Added an executable
+  targeted causal intervention plus three equal-size interventions on the known inert channel.
+- Measurement uses per-episode outcomes. Exact protocol counts are observed, while unavailable
+  peak-RSS and elapsed-time measurements remain `undetermined`. Consequently resource matching and
+  the provisional gain decision remain undetermined; the final result honestly retains failed
+  `heldout-gain` and `matched-controls` gates and reports
+  `simulated-alien-sense-transfer-not-established`, `O0/G-S`.
+- Every discovery, recipient, reproduction, baseline, and ablation request/response is saved and
+  content-addressed in the registry. The improvement decision retains the exact control-sample
+  content IDs, and a regression resolves the complete evidence chain through registry verification.
+- Four adversarial review rounds were accepted and resolved. The final read-only review verdict was
+  Ready with no Critical or Important findings; `REVIEW.md` retains the adjudication.
+- Final verification from the durable feature worktree:
+  - `.venv/bin/python -m pytest -q tests/measurement tests/experiments/e2` -> 39 passed;
+  - `.venv/bin/python -m pytest -q` -> 242 passed;
+  - `ruff check .` -> all checks passed;
+  - `mypy aire_prime` -> success in 43 source files;
+  - `.venv/bin/python scripts/export_schemas.py --check` -> exit 0;
+  - `git diff --check` -> exit 0.
+- Two host-contained seed-202 runs were byte-identical. Both report content ID
+  `sha256:3f60ac64e2190fbdd0705e8ef6bad7e8a701e9a42087a82a32d1afeb695a81bc`;
+  report-file SHA-256 is `2eee8e09c21edf7a7e3d42badb0e62288e45ddb80e46ec8c2af45904e370bf44`;
+  registry-file SHA-256 is `780381fcde12676ddb839297936ec4281619e8ad3f5c417c5d2173d41b782221`.
+  The forbidden-result-claim scan returned no matches.
+- Next action after commit/push verification: Task 11 CLI, evidence inspection, and end-to-end
+  reproduction. Task 10 establishes a reproducible bounded negative/undetermined result, not E2
+  improvement, physical grounding, QEC improvement, superintelligence, or new physics.

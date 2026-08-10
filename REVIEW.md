@@ -77,3 +77,26 @@ allowlist type swaps, JSONL exchange, deterministic environment, timeout, and bo
 
 No Task 8 experiment, provider, physical action, deployment, or claim escalation is part of this
 review.
+
+## Task 10 E2 adversarial review
+
+Four read-only review rounds challenged the E2 implementation. Findings were classified and
+resolved as follows:
+
+- **Accepted:** fail-open gate classification, discovery-label leakage, parent-only discovery,
+  raw-mapping transfer, hard-coded controls and ablations, aggregate-as-sample measurement,
+  same-world reproduction, unconditional positive narratives, incomplete resource accounting,
+  post-outcome contract binding, incomplete constructor validation, and unresolved wire lineage.
+- **Accepted:** invented RSS and elapsed values were removed. Their absence now remains explicitly
+  `undetermined`, which prevents the matched-control and provisional-improvement gates from passing.
+- **Accepted:** control measurement provenance now survives into `ImprovementDecision`, and every
+  baseline, ablation, and reproduction request/response resolves through the append-only registry.
+- **Rejected:** no reviewer recommendation was rejected on convenience grounds. The requested
+  `O4/G-S`-eligible path was deliberately not preserved when its resource evidence could not be
+  supported.
+- **Needs investigation:** reproducible host RSS and elapsed-resource evidence remains future work;
+  it is not a hidden completion claim or a reason to reinterpret the present `O0/G-S` result.
+
+**Final verdict: Ready.** No Critical or Important findings remain. Task 10 is ready as an honest,
+deterministic, simulated negative/undetermined result—not established alien-sense transfer and not
+physical, QEC, superintelligence, or new-physics evidence.
