@@ -356,3 +356,25 @@ Do not begin Task 8, E1, E2, CLI, provider, physical, or deployment work.
   `simulated-alien-sense-transfer-not-established`, `O0/G-S`, with `heldout-gain` and
   `matched-controls` failed. A new experiment version must preregister aggregation/tolerance
   before using host timing or RSS to adjudicate resource matching.
+
+## 2026-08-11 — E3 causal-language research package prepared
+
+- Preserved E2 as the frozen `O0/G-S` negative/undetermined baseline. No E2 code, report identity,
+  threshold, or scientific decision was changed.
+- Defined the E3 problem as bounded transfer of an intervention-derived causal program to
+  independently initialized recipients on sealed unseen causal worlds.
+- Added durable research-question, related-work, world, baseline/resource, preregistration, plan,
+  and autonomous-goal documents under `docs/research/`, `docs/plans/`, and
+  `GOAL_E3_CAUSAL_LANGUAGE.md`.
+- The design requires a pushed benchmark/baseline freeze before candidate implementation and a
+  pushed candidate/analysis freeze before confirmatory seed derivation. It accepts positive,
+  partial, negative, or undetermined scientific outcomes.
+- No E3 implementation or confirmatory result exists yet. Next action is to review and publish this
+  planning checkpoint, then invoke `/goal GOAL_E3_CAUSAL_LANGUAGE.md` from the durable AIRE
+  worktree.
+- Planning review found and resolved one Important methodology flaw: the first draft placed the
+  pilot after candidate implementation. The final package requires a baseline/oracle-only pilot and
+  frozen thresholds, sample-size rule, and evaluation contract before candidate code exists.
+- Fresh planning-checkpoint verification: complete suite 300 passed; Ruff passed; strict mypy
+  passed for 48 source files; schema freshness and `git diff --check` passed. E2 implementation and
+  tests are outside the changed-file set.

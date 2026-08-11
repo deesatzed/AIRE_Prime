@@ -52,6 +52,11 @@ undetermined. The final acceptance mapping is in
 findings, and the experimental roadmap are documented in
 [AIRE v0.1 Status and Roadmap](docs/AIRE_V0_1_STATUS_AND_ROADMAP.md).
 
+The next simulated research program is specified, but not yet implemented, in
+[E3 Research Question](docs/research/E3_RESEARCH_QUESTION.md) and
+[E3 Causal-Language Research Goal](GOAL_E3_CAUSAL_LANGUAGE.md). E3 preserves the current E2 result
+and freezes a baseline/oracle pilot before candidate development.
+
 ## Command-line usage
 
 From the repository root:

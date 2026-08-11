@@ -184,3 +184,10 @@ evidence matrix are complete. The branch is ready for review, not deployment. Sc
 has added a bounded E2 resource-observation sidecar and has reproduced it twice through the reviewed
 containment backend. A subsequent experiment version must still predeclare aggregation/tolerance
 before changing the decision. E2 remains the explicit O0/G-S negative/undetermined result.
+
+The next research program is separately specified as E3: intervention-discovered causal-language
+transfer across unseen worlds and independently initialized recipients. Its research question,
+related-work audit, procedural-world specification, baseline/resource contract, preregistration,
+implementation plan, and autonomous goal are under `docs/research/`,
+`docs/plans/2026-08-11-e3-causal-language.md`, and `GOAL_E3_CAUSAL_LANGUAGE.md`. E3 has not started
+and does not upgrade the E2 result.

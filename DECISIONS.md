@@ -198,3 +198,32 @@ failure-detail identity creates a covert variation channel.
 **Consequence:** Hostile bytes are not retained, every reviewed output-rejection path is durable,
 and failure classification remains stable across adversary-controlled wire variants. Callers that
 require durable ingress evidence must configure the adapter's evidence registry.
+
+## D-016: Freeze E2 and advance through a distinct E3 research program
+
+**Decision:** Preserve E2's `O0/G-S` report and decision as historical evidence. Pursue the next
+scientific question as E3, on a distinct research branch and under new contracts, worlds, reports,
+seeds, and identities.
+
+**Reason:** E2's one-bit world and two-row lookup constructor validate the evidence machinery but do
+not create enough task complexity to support a breakthrough-level abstraction claim. Post-hoc
+resource aggregation cannot repair that scientific limitation.
+
+**Consequence:** No E3 work may reinterpret or overwrite E2. E3 asks whether a compact
+intervention-derived causal program improves adaptation by independently initialized recipients on
+sealed unseen causal worlds beyond strong matched alternatives.
+
+## D-017: Freeze the benchmark and baseline frontier before the E3 candidate
+
+**Decision:** Implement the E3 procedural world, leakage audits, metrics, recipient matrix,
+resource contract, and serious baselines; run a baseline/oracle-only public pilot; then review,
+commit, and push that complete benchmark freeze before implementing the sparse causal-program
+candidate. Derive confirmatory seeds only after the candidate and remaining analysis identities are
+also frozen and pushed.
+
+**Reason:** Building the task around a favored method or changing evaluation after observing hidden
+performance would make a positive result scientifically uninterpretable.
+
+**Consequence:** E3 has two irreversible checkpoints: benchmark/baseline freeze and confirmatory
+freeze. A material post-freeze scientific change creates a new E3 version and preserves the old
+evidence. Negative and undetermined outcomes are valid terminal research states.

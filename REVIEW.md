@@ -174,3 +174,24 @@ software-release failure or a positive result.
 **Follow-up verdict: Instrumentation and production observation are ready; scientific gate remains
 open.** The focused gate is green and the containment rerun is reproducible. A subsequent experiment
 version must freeze resource aggregation/tolerance before these observations can affect scoring.
+
+## E3 research-package review
+
+- **Accepted / resolved:** E2's binary world and two-row lookup are an infrastructure-quality
+  scientific baseline, not a sufficient breakthrough task. E3 is versioned separately and cannot
+  reinterpret E2.
+- **Accepted / resolved:** the initial E3 draft placed a public pilot after candidate implementation,
+  allowing candidate behavior to influence thresholds. The final sequence makes the pilot
+  baseline/oracle-only and freezes the benchmark, margins, sample-size rule, and analysis before
+  candidate code exists.
+- **Accepted / resolved:** the goal allows transferred, partial, negative, and undetermined terminal
+  states and separates engineering completion from scientific success.
+- **Needs investigation:** the B7 causal-representation and B8 symmetry/alignment baselines require
+  an extended compatibility audit before the baseline freeze.
+- **Needs investigation:** an outside seed custodian and independently implemented recipient are not
+  currently available. Their absence must keep the strongest independent-confirmation gate open.
+
+**Planning verdict: Ready to publish as a research contract, not an E3 result.** The complete 300-test
+suite, Ruff, strict mypy, schema freshness, and diff checks pass; no E2 implementation or test file
+is changed. Candidate implementation remains blocked until the baseline/oracle pilot and pushed
+benchmark freeze are complete.
