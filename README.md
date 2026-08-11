@@ -40,8 +40,10 @@ limitations.
 
 E1 currently reports reproducible simulated capability transfer. E2 currently reports
 `simulated-alien-sense-transfer-not-established`, `O0/G-S`: its behavioral subtests pass, but
-unobserved peak-RSS and elapsed-time dimensions remain `undetermined`, so matched-resource and
-provisional-improvement gates do not pass.
+resource instrumentation now records elapsed time and peak-RSS as separate noncanonical host
+metadata. The canonical matched-resource and provisional-improvement gates still do not pass until
+those observations are available from the reviewed containment backend under a preregistered
+aggregation rule. See [the E2 resource follow-up](docs/AIRE_E2_RESOURCE_FOLLOWUP.md).
 
 The implementation and fresh-clone gates in [GOAL_REMAINING_STEPS.md](GOAL_REMAINING_STEPS.md)
 are complete. The positive E2 scientific acceptance gate is not: matched-resource evidence remains

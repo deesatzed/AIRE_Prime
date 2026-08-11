@@ -28,7 +28,11 @@ from aire_prime.experiments.e2.discoverer import (
     operator_constructor,
     run_contained_discovery,
 )
-from aire_prime.experiments.e2.recipient import RecipientExchange, run_recipient
+from aire_prime.experiments.e2.recipient import (
+    RecipientExchange,
+    ResourceObservationRecord,
+    run_recipient,
+)
 from aire_prime.experiments.e2.world import CausalSplit, generate_causal_world
 from aire_prime.grc.constructor import ResourceBudget
 from aire_prime.grc.types import SpaceKind, StructuralType
@@ -97,6 +101,7 @@ class E2RunResult(FrozenModel):
     improvement_report: SkipValidation[ImprovementReport]
     report: E2Report
     registry_head: str
+    resource_observations: tuple[ResourceObservationRecord, ...] = ()
 
 
 def _created_at(seed: int) -> datetime:
@@ -361,6 +366,18 @@ def run_e2(*, seed: int, output: Path, forced_failures: tuple[str, ...] = ()) ->
     )
     reproduction_accuracy = sum(reproduction_samples) / len(reproduction_samples)
 
+    resource_observations = tuple(
+        ResourceObservationRecord(arm=arm, observation=exchange.resource_observation)
+        for arm, exchange in (
+            ("candidate", exchange),
+            *(
+                (f"baseline:{baseline.kind}", baseline.exchange)
+                for baseline in baselines
+            ),
+            ("reproduction", reproduction),
+        )
+    )
+
     controls = tuple(
         ControlSamples(
             name=baseline.kind,
@@ -606,6 +623,9 @@ def run_e2(*, seed: int, output: Path, forced_failures: tuple[str, ...] = ()) ->
             ablation_exchange.response.to_jsonl()
         )
     _write(output / "measurement_decision.json", measurement_decision)
+    (output / "resource_observations.json").write_bytes(
+        canonical_bytes([record.model_dump(mode="json") for record in resource_observations])
+    )
     _write(
         output / "baseline_results.json",
         [b.model_dump(mode="json", exclude_computed_fields=True) for b in baselines],
@@ -682,6 +702,7 @@ def run_e2(*, seed: int, output: Path, forced_failures: tuple[str, ...] = ()) ->
         improvement_report=improvement,
         report=report,
         registry_head=events[-1].event_content_id,
+        resource_observations=resource_observations,
     )
 
 

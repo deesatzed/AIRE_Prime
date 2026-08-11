@@ -127,9 +127,31 @@ def test_e2_is_canonically_deterministic(tmp_path: Path) -> None:
     assert first.registry_head == second.registry_head
     assert first.report.classification == "simulated-alien-sense-transfer-not-established"
     assert first.report.evidence_state == "O0/G-S"
-    first_files = {path.name: path.read_bytes() for path in sorted((tmp_path / "a").iterdir())}
-    second_files = {path.name: path.read_bytes() for path in sorted((tmp_path / "b").iterdir())}
+    first_files = {
+        path.name: path.read_bytes()
+        for path in sorted((tmp_path / "a").iterdir())
+        if path.name != "resource_observations.json"
+    }
+    second_files = {
+        path.name: path.read_bytes()
+        for path in sorted((tmp_path / "b").iterdir())
+        if path.name != "resource_observations.json"
+    }
     assert first_files == second_files
+
+
+def test_resource_observations_are_saved_as_noncanonical_host_metadata(tmp_path: Path) -> None:
+    result = run_e2(seed=202, output=tmp_path / "e2")
+    observations = json.loads((tmp_path / "e2" / "resource_observations.json").read_bytes())
+
+    assert [item["arm"] for item in observations] == [
+        "candidate",
+        "baseline:frozen-lookup-policy",
+        "baseline:bandwidth-matched-opaque-tensor",
+        "baseline:conventional-feature-schema",
+        "reproduction",
+    ]
+    assert len(result.resource_observations) == len(observations)
 
 
 def test_transfer_packet_contains_only_constructor_not_discovered_mapping(

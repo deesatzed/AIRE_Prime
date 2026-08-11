@@ -17,7 +17,7 @@ from pathlib import Path
 from time import monotonic
 from typing import Any, Protocol
 
-from pydantic import field_validator, model_validator
+from pydantic import Field, field_validator, model_validator
 
 from aire_prime.agents.ingress import ingest_envelope_jsonl, record_ingress_rejection
 from aire_prime.agents.protocol import (
@@ -51,6 +51,31 @@ RESOURCE_LIMIT_LAUNCHER = (
     "ulimit -f 2048; "
     'exec "$@"'
 )
+
+
+class ResourceObservation(FrozenModel):
+    """Host measurements emitted by the reviewed resource wrapper."""
+
+    elapsed_seconds: float = Field(ge=0, allow_inf_nan=False)
+    peak_resident_bytes: float = Field(ge=0, allow_inf_nan=False)
+
+
+def parse_time_resource_output(output: bytes) -> ResourceObservation | None:
+    """Parse only the stable BSD ``time -l`` fields used by E2."""
+    text = output.decode("utf-8", errors="replace")
+    elapsed_match = re.search(r"(?m)^\s*([0-9]+(?:\.[0-9]+)?)\s+real(?:\s|$)", text)
+    resident_match = re.search(
+        r"(?m)^\s*([0-9]+)\s+maximum resident set size\s*$", text
+    )
+    if elapsed_match is None or resident_match is None:
+        return None
+    elapsed = float(elapsed_match.group(1))
+    resident = float(resident_match.group(1))
+    if not math.isfinite(elapsed) or elapsed < 0:
+        return None
+    if not math.isfinite(resident) or resident < 0 or not resident.is_integer():
+        return None
+    return ResourceObservation(elapsed_seconds=elapsed, peak_resident_bytes=resident)
 
 
 @dataclass(frozen=True)
@@ -273,6 +298,7 @@ class MacOSSandboxBackend:
         *,
         working_directory: Path,
         executable_path: Path,
+        executable_paths: tuple[Path, ...] = (),
         allowed_read_paths: tuple[PathAllowance, ...],
         allowed_write_paths: tuple[PathAllowance, ...],
     ) -> str:
@@ -310,7 +336,11 @@ class MacOSSandboxBackend:
                 "(allow process-exec "
                 f"(literal {json.dumps('/bin/sh')}) "
                 f"(literal {json.dumps('/bin/bash')}) "
-                f"(literal {json.dumps(str(executable_path))}))",
+                f"(literal {json.dumps(str(executable_path))}) "
+                + " ".join(
+                    f"(literal {json.dumps(str(path))})" for path in executable_paths
+                )
+                + ")",
                 working_directory_metadata_rule,
                 f"(allow file-read* {read_filters})",
                 f"(allow file-write* {write_filters})",
@@ -348,9 +378,18 @@ class MacOSSandboxBackend:
                 raise ContainmentPreparationError(
                     "contained command executable must be on the sealed root-owned system volume"
                 )
+            sealed_executable_paths = {
+                artifact.path: artifact.resolved_path
+                for artifact in trusted_command.artifacts
+                if self._is_sealed_system_executable(
+                    Path(artifact.resolved_path), Path(artifact.resolved_path).stat()
+                )
+            }
             execution_argv = tuple(
                 executable_artifact.resolved_path
                 if index == 0
+                else sealed_executable_paths[argument]
+                if argument in sealed_executable_paths
                 else f"/dev/fd/{descriptors[argument]}"
                 if argument in descriptors
                 else argument
@@ -359,6 +398,13 @@ class MacOSSandboxBackend:
             profile = self._profile(
                 working_directory=working_directory,
                 executable_path=executable_path,
+                executable_paths=tuple(
+                    Path(artifact.resolved_path)
+                    for artifact in trusted_command.artifacts
+                    if self._is_sealed_system_executable(
+                        Path(artifact.resolved_path), Path(artifact.resolved_path).stat()
+                    )
+                ),
                 allowed_read_paths=allowed_read_paths,
                 allowed_write_paths=allowed_write_paths,
             )
@@ -578,6 +624,20 @@ class _BoundedCapture:
         return bytes(self.data).decode("utf-8", errors="replace")
 
 
+def _poll_child(process: subprocess.Popen[bytes]) -> tuple[int | None, float | None]:
+    """Poll once and retain per-child wait4 peak RSS when the host supports it."""
+    if process.returncode is not None:
+        return process.returncode, None
+    try:
+        pid, status, usage = os.wait4(process.pid, os.WNOHANG)
+    except (AttributeError, ChildProcessError, OSError):
+        return process.poll(), None
+    if pid == 0:
+        return None, None
+    process.returncode = os.waitstatus_to_exitcode(status)
+    return process.returncode, float(usage.ru_maxrss)
+
+
 class SubprocessAdapter:
     def __init__(
         self,
@@ -592,6 +652,7 @@ class SubprocessAdapter:
         allowed_read_paths: tuple[Path, ...] = (),
         allowed_write_paths: tuple[Path, ...] = (),
         evidence_registry: RegistryStore | None = None,
+        observe_resources: bool = False,
     ) -> None:
         if not working_directory.is_dir():
             raise ValueError("subprocess working directory must exist")
@@ -630,14 +691,21 @@ class SubprocessAdapter:
             PathAllowance.attest(path) for path in allowed_write_paths
         )
         self._evidence_registry = evidence_registry
+        self._observe_resources = observe_resources
+        self._last_resource_observation: ResourceObservation | None = None
         self._diagnostics: list[FailureDiagnostic] = []
 
     @property
     def diagnostics(self) -> tuple[FailureDiagnostic, ...]:
         return tuple(self._diagnostics)
 
+    @property
+    def resource_observation(self) -> ResourceObservation | None:
+        return self._last_resource_observation
+
     def run(self, request: AgentRequest) -> AgentResponse:
         self._diagnostics.clear()
+        self._last_resource_observation = None
         if not self._containment_backend.available:
             return self._failure(
                 request,
@@ -715,6 +783,8 @@ class SubprocessAdapter:
         open_outputs = 2
         total_output = 0
         deadline = monotonic() + self._timeout_seconds
+        started = monotonic()
+        peak_resident_bytes: float | None = None
         timed_out = False
         excess_output = False
         return_code: int | None = None
@@ -724,7 +794,9 @@ class SubprocessAdapter:
                 if remaining_time <= 0:
                     timed_out = True
                     break
-                return_code = process.poll()
+                return_code, observed_peak = _poll_child(process)
+                if observed_peak is not None:
+                    peak_resident_bytes = max(peak_resident_bytes or 0.0, observed_peak)
                 if return_code is not None and open_outputs == 0:
                     break
                 ready = selector.select(timeout=min(remaining_time, 0.05))
@@ -764,19 +836,32 @@ class SubprocessAdapter:
                         break
                 if excess_output:
                     break
-                if process.poll() is not None:
+                if process.returncode is not None:
                     self._close_selector_stream(selector, process.stdin)
         finally:
             self._kill_process_group(process)
-            if process.poll() is None:
-                with suppress(subprocess.TimeoutExpired):
-                    process.wait(timeout=0.2)
+            if process.returncode is None:
+                try:
+                    _, status, usage = os.wait4(process.pid, 0)
+                    process.returncode = os.waitstatus_to_exitcode(status)
+                    peak_resident_bytes = max(
+                        peak_resident_bytes or 0.0, float(usage.ru_maxrss)
+                    )
+                except (AttributeError, ChildProcessError, OSError):
+                    with suppress(subprocess.TimeoutExpired):
+                        process.wait(timeout=0.2)
             for stream in streams:
                 with suppress(OSError, ValueError):
                     selector.unregister(stream)
                 with suppress(OSError, ValueError):
                     stream.close()
             selector.close()
+
+        if self._observe_resources and peak_resident_bytes is not None:
+            self._last_resource_observation = ResourceObservation(
+                elapsed_seconds=monotonic() - started,
+                peak_resident_bytes=peak_resident_bytes,
+            )
 
         if excess_output:
             return self._failure(

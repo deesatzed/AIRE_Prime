@@ -323,3 +323,18 @@ Do not begin Task 8, E1, E2, CLI, provider, physical, or deployment work.
 - Created the final acceptance/evidence matrix. The implementation master goal is ready to close
   as a review-ready branch and protected Q12D baseline, not as positive E2 validation, deployment,
   physical validation, QEC improvement, superintelligence, or new physics.
+
+## 2026-08-11 — Option B E2 resource instrumentation
+
+- Added typed optional subprocess resource observations. Parent monotonic timing and POSIX `wait4`
+  capture per-child peak RSS when the host exposes it; unsupported usage remains undetermined.
+- E2 exchanges retain observations outside scored wire identity. Runs write a separate
+  `resource_observations.json` sidecar for candidate, three baselines, and reproduction; the CLI
+  validates and renders that sidecar.
+- Canonical E2 report/decision bytes remain unchanged. Host timing and RSS are noncanonical and are not
+  substituted into matched-resource comparisons without a preregistered aggregation/tolerance rule.
+- Verification: 300 tests passed; Ruff and strict mypy passed. A direct test-only backend produced
+  non-null observations for all five recorded arms and CLI inspection passed. No new production E2
+  claim was made because the current Seatbelt probe returned `sandbox_apply: Operation not permitted`.
+- Next action: rerun seed 202 twice on a functional reviewed containment host, then adjudicate the
+  sidecar observations under a predeclared rule. Preserve `O0/G-S` if matching remains unproven.

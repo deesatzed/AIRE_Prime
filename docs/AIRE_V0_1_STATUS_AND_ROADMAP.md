@@ -181,5 +181,6 @@ would remain simulator-level.
 
 The implementation master goal, pushed Task 12 checkpoint, fresh-clone reproduction, and final
 evidence matrix are complete. The branch is ready for review, not deployment. Scientific follow-up
-should address the E2 resource-evidence gap before any new experiment phase; E2 remains the
-explicit O0/G-S negative/undetermined result.
+has added a bounded E2 resource-observation sidecar, but must still reproduce it through the reviewed
+containment backend and predeclare aggregation before changing the decision. E2 remains the explicit
+O0/G-S negative/undetermined result.

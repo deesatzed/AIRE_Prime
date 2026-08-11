@@ -2,11 +2,14 @@ import tempfile
 from pathlib import Path
 from typing import cast
 
+from pydantic import Field
+
 from aire_prime.agents import (
     AgentIdentity,
     AgentRequest,
     AgentResponse,
     MessageKind,
+    ResourceObservation,
     Role,
     SubprocessAdapter,
     TrustedCommand,
@@ -77,6 +80,14 @@ class RecipientExchange(FrozenModel):
     response: AgentResponse
     expected_actions: tuple[int, ...]
     expected_artifact_id: ContentID
+    resource_observation: ResourceObservation | None = Field(default=None, exclude=True)
+
+
+class ResourceObservationRecord(FrozenModel):
+    """Noncanonical host metadata kept separate from scored E2 artifacts."""
+
+    arm: str
+    observation: ResourceObservation | None = None
 
 
 def _actions(
@@ -148,18 +159,25 @@ def run_recipient(
                 DeclaredInput(name="task", content_id=task_id),
             ),
         )
-        response = SubprocessAdapter(
-            trusted_command=TrustedCommand.attest(
-                ("/usr/bin/perl", str(script_path), str(operator_path), str(task_path))
-            ),
+        command: tuple[str, ...] = (
+            "/usr/bin/perl",
+            str(script_path),
+            str(operator_path),
+            str(task_path),
+        )
+        adapter = SubprocessAdapter(
+            trusted_command=TrustedCommand.attest(command),
             working_directory=wd,
             timeout_seconds=2.0,
             max_input_bytes=16_384,
             max_output_bytes=16_384,
-        ).run(request)
+            observe_resources=True,
+        )
+        response = adapter.run(request)
     return RecipientExchange(
         request=request,
         response=response,
         expected_actions=expected_actions,
         expected_artifact_id=expected_artifact_id,
+        resource_observation=adapter.resource_observation,
     )

@@ -10,6 +10,7 @@ from aire_prime.agents.protocol import AgentRequest, AgentResponse, MessageKind
 from aire_prime.agents.roles import AgentIdentity, ClaimRoleAssignments, Role
 from aire_prime.agents.subprocess_adapter import (
     FailureDiagnostic,
+    ResourceObservation,
     SubprocessAdapter,
     TrustedCommand,
 )
@@ -20,6 +21,7 @@ __all__ = [
     "AgentResponse",
     "ClaimRoleAssignments",
     "FailureDiagnostic",
+    "ResourceObservation",
     "IngressRejection",
     "IngressResult",
     "MessageKind",

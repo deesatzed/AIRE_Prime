@@ -159,3 +159,15 @@ references. The clone is clean, and the published branch is review-ready.
 complete, but the positive design criteria requiring E2 O4/G-S and matched-resource superiority
 remain unmet. That scientific red state is explicit in the final evidence matrix and is not a
 software-release failure or a positive result.
+
+## Option B resource-instrumentation follow-up
+
+- **Accepted:** elapsed time is measured by the trusted parent monotonic clock; peak RSS uses per-child
+  POSIX `wait4` usage when available.
+- **Accepted:** measurements are kept in a separate noncanonical `resource_observations.json` sidecar
+  and do not alter response wire identities or canonical E2 report IDs.
+- **Needs investigation:** a preregistered aggregation/tolerance rule is still required before these
+  host observations can adjudicate matched-resource superiority. The current interactive Seatbelt
+  probe returned `sandbox_apply: Operation not permitted`; no production E2 claim was advanced.
+
+**Follow-up verdict: Instrumentation ready; scientific gate remains open.**

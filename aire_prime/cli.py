@@ -134,6 +134,7 @@ def _inspect_directory(directory: Path) -> dict[str, object]:
             "occurrence_report.json",
             "improvement_report.json",
             "measurement_decision.json",
+            "resource_observations.json",
             "baseline_results.json",
             "ablation_evidence.json",
             "realization_receipts.json",
@@ -213,6 +214,7 @@ def _inspect_directory(directory: Path) -> dict[str, object]:
 
     decision: ImprovementDecision | None = None
     resource_accounting: dict[str, object] | None = None
+    summary_observations: list[object] = []
     if isinstance(report, E2Report):
         decision = ImprovementDecision.model_validate(
             json.loads((directory / "measurement_decision.json").read_bytes())
@@ -229,6 +231,10 @@ def _inspect_directory(directory: Path) -> dict[str, object]:
             name: measurement.model_dump(mode="json")
             for name, measurement in baseline_results[0].resources.measurements()
         }
+        observations = json.loads((directory / "resource_observations.json").read_bytes())
+        if type(observations) is not list or not observations:
+            raise InspectionError("E2 resource observations must be a nonempty JSON array")
+        summary_observations = observations
 
     exchanges = tuple(
         _validate_exchange_pair(directory / request_name, directory / response_name)
@@ -263,6 +269,8 @@ def _inspect_directory(directory: Path) -> dict[str, object]:
     }
     if resource_accounting is not None:
         summary["baseline_resource_accounting"] = resource_accounting
+    if isinstance(report, E2Report):
+        summary["resource_observations"] = summary_observations
     return summary
 
 
