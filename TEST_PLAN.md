@@ -17,10 +17,9 @@ strict mypy, schema freshness, and diff checks also pass.
 
 ## Missing Tests
 
-| Test Type | Scenario | Why Needed | Priority |
-| --- | --- | --- | --- |
-| Reproducibility | Pinned E1/E2 payload and registry identities | Detect nondeterministic scientific evidence | Important |
-| Integration | Fresh-clone wheel, CLI, registries, and report inspection | Prove the published branch works independently of the development checkout | Important |
+No required automated test gap remains within the v0.1 implementation scope. Pinned E1/E2
+identity reproduction and the full CLI/registry/report workflow passed from a fresh clone of the
+pushed Task 12 checkpoint.
 
 Implemented Task 12 coverage now includes CLI-rendered classification/grounding checks, a
 denial-aware release-claim scanner with mutation fixtures, audited typed ingress and realization

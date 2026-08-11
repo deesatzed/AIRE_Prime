@@ -305,3 +305,21 @@ Do not begin Task 8, E1, E2, CLI, provider, physical, or deployment work.
   - `git diff --check` -> exit 0.
 - Next action: commit and push Task 12, reproduce from a fresh clone of that pushed checkpoint, and
   complete the final evidence matrix and repository handoff. No deployment or merge is authorized.
+
+## 2026-08-07 — Final fresh-clone verification and handoff
+
+- Task 12 commit `fed1e3a68b342d9efec40097c8a969966645eb7f` was pushed without force;
+  local and remote feature heads matched before clean-clone verification.
+- A fresh single-branch clone of the pushed checkpoint installed with `uv sync --frozen` and passed
+  Ruff, strict mypy (48 source files), schema freshness, the wheel-install test, real macOS
+  containment integrations, `git diff --check`, and 296 tests at 92.29% coverage.
+- The fresh clone was clean and exactly on `fed1e3a`. Its seed-101 E1 and seed-202 E2 runs reproduced
+  the published report IDs, registry heads, report-file hashes, and registry-file hashes recorded
+  in `docs/AIRE_V0_1_FINAL_EVIDENCE_MATRIX.md`.
+- E1 remains `simulated-capability-transfer`, O4/G-S. E2 remains
+  `simulated-alien-sense-transfer-not-established`, O0/G-S, with `heldout-gain` and
+  `matched-controls` failed. The canonical positive design criteria requiring E2 O4/G-S and
+  matched-resource superiority remain explicitly unmet.
+- Created the final acceptance/evidence matrix. The implementation master goal is ready to close
+  as a review-ready branch and protected Q12D baseline, not as positive E2 validation, deployment,
+  physical validation, QEC improvement, superintelligence, or new physics.

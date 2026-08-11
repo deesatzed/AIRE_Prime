@@ -43,9 +43,11 @@ E1 currently reports reproducible simulated capability transfer. E2 currently re
 unobserved peak-RSS and elapsed-time dimensions remain `undetermined`, so matched-resource and
 provisional-improvement gates do not pass.
 
-The remaining gate is final fresh-clone verification and repository handoff under
-[GOAL_REMAINING_STEPS.md](GOAL_REMAINING_STEPS.md). The complete status, review findings, and
-experimental roadmap are documented in
+The implementation and fresh-clone gates in [GOAL_REMAINING_STEPS.md](GOAL_REMAINING_STEPS.md)
+are complete. The positive E2 scientific acceptance gate is not: matched-resource evidence remains
+undetermined. The final acceptance mapping is in
+[AIRE v0.1 Final Evidence Matrix](docs/AIRE_V0_1_FINAL_EVIDENCE_MATRIX.md). Complete status, review
+findings, and the experimental roadmap are documented in
 [AIRE v0.1 Status and Roadmap](docs/AIRE_V0_1_STATUS_AND_ROADMAP.md).
 
 ## Command-line usage

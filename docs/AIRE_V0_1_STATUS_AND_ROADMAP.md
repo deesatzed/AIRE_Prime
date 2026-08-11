@@ -166,8 +166,8 @@ gates do not pass.
    claims and unresolved threats.
 
    **Current evidence:** green for the development-worktree gate. Typed hostile-ingress evidence,
-   metric-gaming agents, claim mutations, and independent reviews pass; fresh-clone verification
-   of the pushed checkpoint remains the final publication gate.
+   metric-gaming agents, claim mutations, and independent reviews pass. Fresh-clone verification
+   of the pushed checkpoint also passed during final handoff.
 
 ## Path toward Q12D/QEC
 
@@ -179,6 +179,7 @@ would remain simulator-level.
 
 ## Current next action
 
-Publish the Task 12 checkpoint, reproduce it from a fresh clone, and complete the final evidence
-matrix and repository handoff under [`GOAL_REMAINING_STEPS.md`](../GOAL_REMAINING_STEPS.md). E1 and
-E2 remain simulated protocol evidence; E2 remains the explicit O0/G-S negative/undetermined result.
+The implementation master goal, pushed Task 12 checkpoint, fresh-clone reproduction, and final
+evidence matrix are complete. The branch is ready for review, not deployment. Scientific follow-up
+should address the E2 resource-evidence gap before any new experiment phase; E2 remains the
+explicit O0/G-S negative/undetermined result.

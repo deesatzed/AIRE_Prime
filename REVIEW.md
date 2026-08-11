@@ -141,9 +141,21 @@ loopholes, and missing tests. Findings were classified and resolved through repe
   through frozen Measurement Layer Zero adjudication.
 - **Accepted / resolved:** file-descriptor capture made the suite order-dependent; the lightweight
   claim test now uses stream capture, and the exact reproducer passes before contained E1/E2.
-- **Needs investigation:** fresh-clone verification of the pushed Task 12 checkpoint remains the
-  next release gate, not an implementation-review defect.
+- **Needs investigation at review time / subsequently resolved:** fresh-clone verification was the
+  next release gate, not an implementation-review defect; the final handoff gate below records its
+  successful completion.
 
 **Final verdict: Ready.** No Critical or Important findings remain. The latest host gate passes 296
 tests at 92.29% coverage with Ruff, strict mypy, schema freshness, and diff checks green. Task 12 is
-ready to commit and publish for fresh-clone reproduction.
+ready to commit and publish for fresh-clone reproduction, which subsequently passed below.
+
+## Final handoff review
+
+The pushed Task 12 checkpoint `fed1e3a` passed the full gate again from a fresh single-branch clone.
+Pinned E1/E2 report IDs, registry heads, and canonical file hashes match the development-worktree
+references. The clone is clean, and the published branch is review-ready.
+
+**Release-boundary judgment: Ready for code review, not deployment.** The implementation goal is
+complete, but the positive design criteria requiring E2 O4/G-S and matched-resource superiority
+remain unmet. That scientific red state is explicit in the final evidence matrix and is not a
+software-release failure or a positive result.
