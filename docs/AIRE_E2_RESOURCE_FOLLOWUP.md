@@ -18,7 +18,11 @@ report and matched-resource decision remain governed by the existing frozen cont
 
 - New parser tests cover valid BSD `time -l` text, missing fields, and nonfinite/negative rejection.
 - Agent/adversarial tests: 82 passed.
-- Full suite after the change: 300 passed.
+- Focused implementation/static gate: 148 passed, Ruff, strict mypy, schema freshness, and diff
+  checks passed.
+- A later complete 300-test attempt was blocked by 30 containment-dependent failures because the
+  current host Seatbelt probe returned `sandbox_apply: Operation not permitted`; this is an external
+  host gate, not evidence of a positive E2 result.
 - Ruff and strict mypy passed.
 - Direct test-only backend: E2 retained report ID
   `sha256:3f60ac64e2190fbdd0705e8ef6bad7e8a701e9a42087a82a32d1afeb695a81bc`; the sidecar contained

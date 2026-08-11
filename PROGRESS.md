@@ -333,8 +333,10 @@ Do not begin Task 8, E1, E2, CLI, provider, physical, or deployment work.
   validates and renders that sidecar.
 - Canonical E2 report/decision bytes remain unchanged. Host timing and RSS are noncanonical and are not
   substituted into matched-resource comparisons without a preregistered aggregation/tolerance rule.
-- Verification: 300 tests passed; Ruff and strict mypy passed. A direct test-only backend produced
-  non-null observations for all five recorded arms and CLI inspection passed. No new production E2
-  claim was made because the current Seatbelt probe returned `sandbox_apply: Operation not permitted`.
+- Verification: 148 focused tests passed; Ruff, strict mypy, schema freshness, and diff checks passed.
+  A direct test-only backend produced non-null observations for all five recorded arms and CLI
+  inspection passed. A later complete 300-test attempt was blocked by 30 containment-dependent
+  failures because the current Seatbelt probe returned `sandbox_apply: Operation not permitted`.
+  No new production E2 claim was made.
 - Next action: rerun seed 202 twice on a functional reviewed containment host, then adjudicate the
   sidecar observations under a predeclared rule. Preserve `O0/G-S` if matching remains unproven.

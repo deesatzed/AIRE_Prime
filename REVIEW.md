@@ -170,4 +170,6 @@ software-release failure or a positive result.
   host observations can adjudicate matched-resource superiority. The current interactive Seatbelt
   probe returned `sandbox_apply: Operation not permitted`; no production E2 claim was advanced.
 
-**Follow-up verdict: Instrumentation ready; scientific gate remains open.**
+**Follow-up verdict: Instrumentation ready; scientific gate remains open.** The focused gate is green;
+the full release gate is blocked by the current host’s unavailable Seatbelt probe and must be rerun on
+a functional reviewed containment host.
