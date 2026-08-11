@@ -121,3 +121,29 @@ behavior, and fail-closed evidence inspection.
 
 **Final verdict: Ready.** No Critical or Important findings remain. Task 11 is suitable to commit
 and proceed to the Task 12 adversarial release review.
+
+## Task 12 adversarial release review
+
+Three independent read-only review streams covered correctness/architecture, security and
+loopholes, and missing tests. Findings were classified and resolved through repeated review:
+
+- **Accepted / resolved:** source-literal and exact-phrase scans were replaced with actual
+  CLI-rendered classification/grounding checks plus proposition-scoped mutation testing.
+- **Accepted / resolved:** test-manufactured rejection records were replaced by production audited
+  ingress and realization boundaries that store their exact typed results.
+- **Accepted / resolved:** malformed and noncanonical wire, wrong envelope kind, wrong request link,
+  role conflict, and file-access output are all registered by the real adapter path when auditing is
+  configured. Failure detail identity is code-derived; a separate wire hash retains provenance.
+- **Accepted / resolved:** inert pickle data was replaced with an executable reduce sentinel whose
+  absence proves no deserialization side effect.
+- **Accepted / resolved:** label-only metric fixtures were replaced by four bounded gaming agents
+  whose behavior generates the samples, protected outcomes, access declarations, and priors sent
+  through frozen Measurement Layer Zero adjudication.
+- **Accepted / resolved:** file-descriptor capture made the suite order-dependent; the lightweight
+  claim test now uses stream capture, and the exact reproducer passes before contained E1/E2.
+- **Needs investigation:** fresh-clone verification of the pushed Task 12 checkpoint remains the
+  next release gate, not an implementation-review defect.
+
+**Final verdict: Ready.** No Critical or Important findings remain. The latest host gate passes 296
+tests at 92.29% coverage with Ruff, strict mypy, schema freshness, and diff checks green. Task 12 is
+ready to commit and publish for fresh-clone reproduction.

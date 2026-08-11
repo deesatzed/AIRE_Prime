@@ -212,6 +212,7 @@ def _inspect_directory(directory: Path) -> dict[str, object]:
         raise InspectionError("occurrence contract link does not resolve")
 
     decision: ImprovementDecision | None = None
+    resource_accounting: dict[str, object] | None = None
     if isinstance(report, E2Report):
         decision = ImprovementDecision.model_validate(
             json.loads((directory / "measurement_decision.json").read_bytes())
@@ -221,7 +222,13 @@ def _inspect_directory(directory: Path) -> dict[str, object]:
         values = json.loads((directory / "baseline_results.json").read_bytes())
         if type(values) is not list:
             raise InspectionError("E2 baseline results must be a JSON array")
-        tuple(E2BaselineResult.model_validate(value) for value in values)
+        baseline_results = tuple(E2BaselineResult.model_validate(value) for value in values)
+        if not baseline_results:
+            raise InspectionError("E2 baseline results must not be empty")
+        resource_accounting = {
+            name: measurement.model_dump(mode="json")
+            for name, measurement in baseline_results[0].resources.measurements()
+        }
 
     exchanges = tuple(
         _validate_exchange_pair(directory / request_name, directory / response_name)
@@ -246,7 +253,7 @@ def _inspect_directory(directory: Path) -> dict[str, object]:
     if not required <= registered:
         missing = tuple(sorted(required - registered))
         raise InspectionError(f"required report chain does not resolve: {missing}")
-    return {
+    summary: dict[str, object] = {
         "report_id": report.content_id,
         "classification": report.classification,
         "grounding": occurrence.evidence_state.grounding.value,
@@ -254,6 +261,9 @@ def _inspect_directory(directory: Path) -> dict[str, object]:
         "failed_gates": report.failed_gates,
         "registry_head": events[-1].event_content_id,
     }
+    if resource_accounting is not None:
+        summary["baseline_resource_accounting"] = resource_accounting
+    return summary
 
 
 def _inspect_file(path: Path) -> tuple[CanonicalObject, dict[str, object]]:

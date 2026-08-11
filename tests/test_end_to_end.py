@@ -3,6 +3,8 @@ import shutil
 from datetime import UTC, datetime
 from pathlib import Path
 
+import pytest
+
 from aire_prime.agents import AgentRequest, AgentResponse
 from aire_prime.cli import run_cli
 from aire_prime.core.canonical import canonical_bytes, content_id
@@ -22,17 +24,33 @@ def _wire(path: Path) -> dict[str, object]:
     return value
 
 
-def test_cli_reproduces_and_inspects_e1_e2_evidence(tmp_path: Path) -> None:
+def test_cli_reproduces_and_inspects_e1_e2_evidence(
+    tmp_path: Path, capfd: pytest.CaptureFixture[str]
+) -> None:
     e1 = tmp_path / "e1"
     e2 = tmp_path / "e2"
     assert run_cli(["e1", "run", "--seed", "101", "--output", str(e1)]) == 0
+    capfd.readouterr()
     assert run_cli(["e2", "run", "--seed", "202", "--output", str(e2)]) == 0
+    capfd.readouterr()
     for directory, report_type, report_name in (
         (e1, E1Report, "e1_report.json"),
         (e2, E2Report, "e2_report.json"),
     ):
         assert run_cli(["registry", "verify", str(directory / "registry.jsonl")]) == 0
+        capfd.readouterr()
         assert run_cli(["report", "show", str(directory)]) == 0
+        shown = json.loads(capfd.readouterr().out)
+        assert shown["classification"] in {
+            "simulated-capability-transfer",
+            "simulated-alien-sense-transfer-not-established",
+        }
+        assert shown["grounding"] == "G-S"
+        if report_name == "e2_report.json":
+            assert shown["occurrence"] == "O0"
+            accounting = shown["baseline_resource_accounting"]
+            for name in ("peak_resident_bytes", "elapsed_time"):
+                assert accounting[name] == {"state": "undetermined", "value": None}
         report = report_type.from_wire(_wire(directory / report_name))
         contract = EvaluationContract.from_wire(_wire(directory / "evaluation_contract.json"))
         bridge = BridgeContract.from_wire(_wire(directory / "bridge_contract.json"))

@@ -182,3 +182,19 @@ schema access would also make a nominally packaged CLI non-reproducible outside 
 manifest and its negative tests. Canonical registry serialization may supersede historical
 registry-file hashes, but published report identities and scientific conclusions cannot be
 silently rewritten.
+
+## D-015: Make hostile ingress rejection evidence a runtime property
+
+**Decision:** Untrusted child output uses an audited ingress whenever an evidence registry is
+configured. Parser, size, response-kind, request-link, role-conflict, and undeclared-file-access
+rejections append the exact typed rejection object. The rejection binds a SHA-256 wire commitment,
+while `detail_content_id` derives only from the failure code. Bounded realizer attacks use an
+audited wrapper that stores the exact returned receipt.
+
+**Reason:** A test that catches an exception and constructs its own failure record proves neither
+runtime behavior nor provenance. Conversely, using adversary-controlled bytes as the scored
+failure-detail identity creates a covert variation channel.
+
+**Consequence:** Hostile bytes are not retained, every reviewed output-rejection path is durable,
+and failure classification remains stable across adversary-controlled wire variants. Callers that
+require durable ingress evidence must configure the adapter's evidence registry.

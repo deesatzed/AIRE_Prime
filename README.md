@@ -13,7 +13,7 @@ The governing methodology and boundaries are defined in the
 
 ## Current implementation status
 
-Tasks 1--11 have implementations on `feature/aire-v0.1`:
+Tasks 1--12 have implementations on `feature/aire-v0.1`:
 
 - reproducible Python research scaffold and explicit claim boundaries;
 - canonical serialization, content-addressed identity, and deeply immutable models;
@@ -27,7 +27,9 @@ Tasks 1--11 have implementations on `feature/aire-v0.1`:
 - E2 contained simulated discovery, transfer, executable controls/ablations, and distinct-seed
   reproduction; and
 - a packaged `aire-prime` CLI for schema checks, experiment execution, registry verification, and
-  fail-closed evidence inspection.
+  fail-closed evidence inspection; and
+- audited hostile-packet rejection, metric-gaming regressions, claim-boundary mutation tests, and
+  a release evidence boundary.
 
 Task 7 supports macOS 27 arm64 only when its functional Seatbelt probe passes. It fails closed on
 other hosts. The contained boundary uses immutable artifact snapshots, explicit bounded command
@@ -41,7 +43,7 @@ E1 currently reports reproducible simulated capability transfer. E2 currently re
 unobserved peak-RSS and elapsed-time dimensions remain `undetermined`, so matched-resource and
 provisional-improvement gates do not pass.
 
-The next gated phase is Task 12 adversarial release review under
+The remaining gate is final fresh-clone verification and repository handoff under
 [GOAL_REMAINING_STEPS.md](GOAL_REMAINING_STEPS.md). The complete status, review findings, and
 experimental roadmap are documented in
 [AIRE v0.1 Status and Roadmap](docs/AIRE_V0_1_STATUS_AND_ROADMAP.md).

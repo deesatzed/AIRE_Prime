@@ -19,6 +19,7 @@ from typing import Any, Protocol
 
 from pydantic import field_validator, model_validator
 
+from aire_prime.agents.ingress import ingest_envelope_jsonl, record_ingress_rejection
 from aire_prime.agents.protocol import (
     AgentRequest,
     AgentResponse,
@@ -29,6 +30,7 @@ from aire_prime.agents.protocol import (
 from aire_prime.core.canonical import content_id
 from aire_prime.core.model import FrozenModel
 from aire_prime.objects import ContentID
+from aire_prime.registry.store import RegistryStore
 
 DETERMINISTIC_ENVIRONMENT = {"LANG": "C", "LC_ALL": "C", "TZ": "UTC"}
 FILE_ACCESS_FIELDS = frozenset(
@@ -589,6 +591,7 @@ class SubprocessAdapter:
         containment_backend: ContainmentBackend | None = None,
         allowed_read_paths: tuple[Path, ...] = (),
         allowed_write_paths: tuple[Path, ...] = (),
+        evidence_registry: RegistryStore | None = None,
     ) -> None:
         if not working_directory.is_dir():
             raise ValueError("subprocess working directory must exist")
@@ -626,6 +629,7 @@ class SubprocessAdapter:
         self._allowed_write_paths = tuple(
             PathAllowance.attest(path) for path in allowed_write_paths
         )
+        self._evidence_registry = evidence_registry
         self._diagnostics: list[FailureDiagnostic] = []
 
     @property
@@ -799,34 +803,82 @@ class SubprocessAdapter:
         output = bytes(stdout.data)
         file_access = self._detect_file_access(output)
         if file_access is not None:
+            self._record_output_rejection(
+                output, request, ProtocolFailureCode.UNDECLARED_FILE_ACCESS
+            )
             return self._failure(
                 request,
                 ProtocolFailureCode.UNDECLARED_FILE_ACCESS,
                 "agent requested undeclared file access",
                 file_access,
             )
-        try:
-            response = AgentResponse.from_jsonl(output)
-        except (ValueError, RecursionError) as error:
-            return self._failure(
-                request,
-                ProtocolFailureCode.MALFORMED_JSON,
-                "agent returned malformed or noncanonical JSONL",
-                str(error),
+        if self._evidence_registry is None:
+            try:
+                response = AgentResponse.from_jsonl(output)
+            except (ValueError, RecursionError) as error:
+                return self._failure(
+                    request,
+                    ProtocolFailureCode.MALFORMED_JSON,
+                    "agent returned malformed or noncanonical JSONL",
+                    str(error),
+                )
+        else:
+            ingress = ingest_envelope_jsonl(
+                output,
+                registry=self._evidence_registry,
+                actor_role="receiver",
+                actor_id=request.receiver.agent_id,
+                max_input_bytes=self._max_output_bytes,
             )
+            if ingress.rejection is not None:
+                return self._failure(
+                    request,
+                    ingress.rejection.failure.code,
+                    "agent response failed audited protocol ingress",
+                )
+            if not isinstance(ingress.envelope, AgentResponse):
+                self._record_output_rejection(
+                    output, request, ProtocolFailureCode.PROTOCOL_VIOLATION
+                )
+                return self._failure(
+                    request,
+                    ProtocolFailureCode.PROTOCOL_VIOLATION,
+                    "agent returned a request where a response was required",
+                )
+            response = ingress.envelope
         if response.request_content_id != request.content_id:
+            self._record_output_rejection(
+                output, request, ProtocolFailureCode.PROTOCOL_VIOLATION
+            )
             return self._failure(
                 request,
                 ProtocolFailureCode.PROTOCOL_VIOLATION,
                 "agent response references a different request",
             )
         if response.sender != request.receiver or response.receiver != request.sender:
+            self._record_output_rejection(output, request, ProtocolFailureCode.ROLE_CONFLICT)
             return self._failure(
                 request,
                 ProtocolFailureCode.ROLE_CONFLICT,
                 "agent response identities conflict with the request roles",
             )
         return response
+
+    def _record_output_rejection(
+        self,
+        output: bytes,
+        request: AgentRequest,
+        code: ProtocolFailureCode,
+    ) -> None:
+        if self._evidence_registry is None:
+            return
+        record_ingress_rejection(
+            output,
+            code,
+            registry=self._evidence_registry,
+            actor_role="receiver",
+            actor_id=request.receiver.agent_id,
+        )
 
     @staticmethod
     def _detect_file_access(output: bytes) -> str | None:

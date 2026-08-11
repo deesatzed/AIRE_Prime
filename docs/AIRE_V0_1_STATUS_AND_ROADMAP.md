@@ -4,14 +4,14 @@
 
 **Implementation branch:** `feature/aire-v0.1`
 
-**Reviewed implementation baseline:** `d0bd6c3` (Task 9 matched measurement controls)
+**Reviewed implementation baseline:** `664ed94` (Task 11 CLI and end-to-end inspection)
 
 ## Evidence boundary
 
-Tasks 1--8 now have deterministic, typed implementations for object representation, bounded GRO
-realization, append-only evidence, isolated-role exchange, and simulated E1 capability transfer.
-The Task 8 checkpoint gate produced 203 passing tests plus Ruff, strict mypy, deterministic JSON
-Schema export, clean diff checks, and byte-identical independent seed-101 evidence runs.
+Tasks 1--12 now have deterministic, typed implementations for object representation, bounded GRO
+realization, append-only evidence, isolated-role exchange, simulated E1/E2 experimentation,
+Measurement Layer Zero, external CLI inspection, and adversarial evidence boundaries. Exact phase
+and release-gate evidence is recorded in `PROGRESS.md` and `docs/AIRE_V0_1_EVIDENCE.md`.
 
 The Tasks 5--7 substrate gate is **green on its declared host boundary**: macOS 27 arm64 with a
 passing functional Seatbelt probe. Other hosts fail closed. The Task 7 adapter enforces immutable
@@ -110,8 +110,10 @@ The original four local-only commits were backed up to GitHub before reconstruct
 test patch was observed RED before implementation was replayed. No test was skipped, weakened, or
 deleted to obtain the green result.
 
-Task 7 remains infrastructure evidence. Task 8 now adds reproducible simulated E1 protocol
-evidence; E2 has not been implemented or demonstrated.
+Task 7 remains infrastructure evidence. Task 8 adds reproducible simulated E1 protocol evidence.
+Task 10 implements E2 but retains the honest negative/undetermined classification
+`simulated-alien-sense-transfer-not-established`, O0/G-S, because matched-resource and held-out-gain
+gates do not pass.
 
 ### Experimental proof -- Tasks 8--10
 
@@ -142,6 +144,11 @@ evidence; E2 has not been implemented or demonstrated.
    transfer it to a fresh recipient, and retain its advantage under hidden transformations? Only
    all passed gates may support `O4/G-S`: independently transferred, simulated evidence.
 
+   **Current evidence:** negative/undetermined. Contained discovery, causal intervention,
+   fresh-recipient transfer, transformed evaluation, and distinct-seed reproduction pass, but
+   missing peak-RSS and elapsed-time observations keep resource comparison and improvement
+   undetermined. The report remains O0/G-S.
+
 ### Reproducibility and release -- Tasks 11--12
 
 7. **Task 11: CLI and end-to-end verification**
@@ -149,11 +156,18 @@ evidence; E2 has not been implemented or demonstrated.
    Can an external researcher run, inspect, reproduce, and reject invalid E1/E2 evidence without
    trusting internal implementation claims?
 
+   **Current evidence:** green. The packaged CLI runs both experiments, verifies registries,
+   rejects broken evidence chains and grounding escalation, and works from an installed wheel.
+
 8. **Task 12: adversarial release review**
 
    Do the evidence claims survive hostile packets, covert-channel attempts, metric gaming, claim
    escalation, and independent review? The resulting evidence document must state both supported
    claims and unresolved threats.
+
+   **Current evidence:** green for the development-worktree gate. Typed hostile-ingress evidence,
+   metric-gaming agents, claim mutations, and independent reviews pass; fresh-clone verification
+   of the pushed checkpoint remains the final publication gate.
 
 ## Path toward Q12D/QEC
 
@@ -165,7 +179,6 @@ would remain simulator-level.
 
 ## Current next action
 
-After publishing and verifying the Task 9 checkpoint, begin Task 10 simulated E2 under
-[`GOAL_REMAINING_STEPS.md`](../GOAL_REMAINING_STEPS.md). E1 and Measurement Layer Zero remain
-simulated protocol/infrastructure evidence and must not be described as physical, QEC,
-superintelligence, or new-physics evidence.
+Publish the Task 12 checkpoint, reproduce it from a fresh clone, and complete the final evidence
+matrix and repository handoff under [`GOAL_REMAINING_STEPS.md`](../GOAL_REMAINING_STEPS.md). E1 and
+E2 remain simulated protocol evidence; E2 remains the explicit O0/G-S negative/undetermined result.

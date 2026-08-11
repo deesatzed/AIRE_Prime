@@ -274,3 +274,34 @@ Do not begin Task 8, E1, E2, CLI, provider, physical, or deployment work.
 - Independent read-only review verdict: Ready, with no Critical or Important findings remaining.
 - Next action after commit/push verification: Task 12 adversarial claim, packet-channel, and
   metric-gaming review plus publication of `docs/AIRE_V0_1_EVIDENCE.md`.
+
+## 2026-08-07 — Task 12 adversarial release review complete
+
+- Published `docs/AIRE_V0_1_EVIDENCE.md` with supported and unsupported claims, exact E1/E2
+  baselines, maturity and grounding, resource accounting, attacks, limitations, reproduction, and
+  deferred E3--E5 work.
+- Added a production audited protocol ingress and integrated it with the real subprocess response
+  path. Malformed, oversized, noncanonical, wrong-kind, wrong-link, role-conflicting, and
+  undeclared-file-access output produces typed, content-addressed registry evidence without
+  retaining hostile bytes. Failure detail identity is code-derived, not child-controlled.
+- Added an audited bounded-realization wrapper that stores the exact returned receipt. Packet
+  regressions cover source, executable pickle, path traversal, subprocess, oversized tensor/wire,
+  recursive reference, hidden environment, content-ID mismatch, and semantic child-output attacks.
+- Added four bounded gaming agents. Their generated random novelty, all-state access, difficult-case
+  refusal, and undeclared-prior behavior is rejected or held undetermined by protected dimensions
+  and frozen Measurement Layer Zero comparisons.
+- Added CLI-rendered classification/grounding checks, public E2 resource-state rendering, and a
+  denial-aware claim scanner with positive, negation, mixed-clause, section, wrapping, conjunction,
+  and subordinator mutation regressions.
+- Three independent read-only review streams challenged correctness/architecture, security and
+  loopholes, and test gaps. All Critical and Important findings were accepted and resolved. Final
+  verdicts are Ready with no Critical or Important findings.
+- Final development-worktree verification:
+  - `.venv/bin/python -m pytest --cov=aire_prime --cov-report=term-missing --cov-fail-under=90`
+    -> 296 passed, 92.29% coverage;
+  - `.venv/bin/ruff check .` -> all checks passed;
+  - `.venv/bin/mypy` -> success in 48 source files;
+  - `.venv/bin/python scripts/export_schemas.py --check` -> exit 0;
+  - `git diff --check` -> exit 0.
+- Next action: commit and push Task 12, reproduce from a fresh clone of that pushed checkpoint, and
+  complete the final evidence matrix and repository handoff. No deployment or merge is authorized.
