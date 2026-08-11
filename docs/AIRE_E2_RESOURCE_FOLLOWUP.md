@@ -20,17 +20,26 @@ report and matched-resource decision remain governed by the existing frozen cont
 - Agent/adversarial tests: 82 passed.
 - Focused implementation/static gate: 148 passed, Ruff, strict mypy, schema freshness, and diff
   checks passed.
-- A later complete 300-test attempt was blocked by 30 containment-dependent failures because the
-  current host Seatbelt probe returned `sandbox_apply: Operation not permitted`; this is an external
-  host gate, not evidence of a positive E2 result.
+- A prior complete 300-test attempt was blocked by 30 containment-dependent failures because the
+  interactive host Seatbelt probe returned `sandbox_apply: Operation not permitted`; this was an
+  external host gate, not evidence of a positive E2 result.
 - Ruff and strict mypy passed.
 - Direct test-only backend: E2 retained report ID
   `sha256:3f60ac64e2190fbdd0705e8ef6bad7e8a701e9a42087a82a32d1afeb695a81bc`; the sidecar contained
   non-null elapsed and peak-RSS observations for all five recorded arms; CLI inspection passed.
 
-The direct backend is protocol-mechanics verification, not production containment evidence. A
-production rerun must pass the reviewed macOS Seatbelt backend. The current interactive host probe
-returned `sandbox_apply: Operation not permitted`, so no new production E2 result is promoted.
+The direct backend is protocol-mechanics verification, not production containment evidence. The
+reviewed elevated Seatbelt probe subsequently passed, and two real seed-202 production runs
+completed successfully. Their canonical report IDs matched exactly:
+
+`sha256:3f60ac64e2190fbdd0705e8ef6bad7e8a701e9a42087a82a32d1afeb695a81bc`
+
+Both runs also reproduced registry head
+`sha256:026454dd53f2fd1c6363b7ad4213f0fcf5a0ba2257aa73e9619aa68542d4c314`. The two temporary
+sidecars were hashed `0f82f6064174218b8227a41fc2f210ce4f82ffca909bdbfde32497937f559017` and
+`0407b344b1687f960f742c3029ddb2f45612641325baccfe389ec274bb17807b`. They contain non-null
+elapsed-time and peak-RSS values for all five arms. These are now production containment
+observations, but they are not a post-hoc license to change the frozen scientific decision.
 
 ## Interpretation
 
@@ -42,6 +51,8 @@ using these observations to change the scientific decision.
 
 ## Next bounded action
 
-Run seed 202 twice on a host where the reviewed containment probe is functional, inspect both sidecars,
-and decide whether a preregistered aggregation rule can make resource matching valid. Preserve
-`O0/G-S` if it cannot.
+Define and preregister a resource aggregation/tolerance rule in a subsequent experiment version,
+then rerun under that contract if resource matching is still scientifically required. Do not mutate
+the v0.1 decision from these observations: both runs remain
+`simulated-alien-sense-transfer-not-established`, `O0/G-S`, with `heldout-gain` and
+`matched-controls` failed.

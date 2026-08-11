@@ -340,3 +340,19 @@ Do not begin Task 8, E1, E2, CLI, provider, physical, or deployment work.
   No new production E2 claim was made.
 - Next action: rerun seed 202 twice on a functional reviewed containment host, then adjudicate the
   sidecar observations under a predeclared rule. Preserve `O0/G-S` if matching remains unproven.
+
+## 2026-08-11 — Option B production containment rerun complete
+
+- The reviewed elevated macOS Seatbelt probe passed. Two real seed-202 E2 runs completed under the
+  containment backend and produced non-null resource sidecars for candidate, three baselines, and
+  reproduction.
+- Both runs reproduced the canonical E2 report ID
+  `sha256:3f60ac64e2190fbdd0705e8ef6bad7e8a701e9a42087a82a32d1afeb695a81bc` and registry head
+  `sha256:026454dd53f2fd1c6363b7ad4213f0fcf5a0ba2257aa73e9619aa68542d4c314`.
+- Sidecar hashes were
+  `0f82f6064174218b8227a41fc2f210ce4f82ffca909bdbfde32497937f559017` and
+  `0407b344b1687f960f742c3029ddb2f45612641325baccfe389ec274bb17807b`.
+- The observations do not alter v0.1 scoring: the canonical report remains
+  `simulated-alien-sense-transfer-not-established`, `O0/G-S`, with `heldout-gain` and
+  `matched-controls` failed. A new experiment version must preregister aggregation/tolerance
+  before using host timing or RSS to adjudicate resource matching.

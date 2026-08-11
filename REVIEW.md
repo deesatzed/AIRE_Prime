@@ -167,9 +167,10 @@ software-release failure or a positive result.
 - **Accepted:** measurements are kept in a separate noncanonical `resource_observations.json` sidecar
   and do not alter response wire identities or canonical E2 report IDs.
 - **Needs investigation:** a preregistered aggregation/tolerance rule is still required before these
-  host observations can adjudicate matched-resource superiority. The current interactive Seatbelt
-  probe returned `sandbox_apply: Operation not permitted`; no production E2 claim was advanced.
+  host observations can adjudicate matched-resource superiority. The reviewed elevated Seatbelt
+  probe now passes and two real seed-202 runs produced complete sidecars, but no scientific claim was
+  advanced from post-hoc host measurements.
 
-**Follow-up verdict: Instrumentation ready; scientific gate remains open.** The focused gate is green;
-the full release gate is blocked by the current host’s unavailable Seatbelt probe and must be rerun on
-a functional reviewed containment host.
+**Follow-up verdict: Instrumentation and production observation are ready; scientific gate remains
+open.** The focused gate is green and the containment rerun is reproducible. A subsequent experiment
+version must freeze resource aggregation/tolerance before these observations can affect scoring.

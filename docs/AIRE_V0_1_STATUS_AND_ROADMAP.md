@@ -181,6 +181,6 @@ would remain simulator-level.
 
 The implementation master goal, pushed Task 12 checkpoint, fresh-clone reproduction, and final
 evidence matrix are complete. The branch is ready for review, not deployment. Scientific follow-up
-has added a bounded E2 resource-observation sidecar, but must still reproduce it through the reviewed
-containment backend and predeclare aggregation before changing the decision. E2 remains the explicit
-O0/G-S negative/undetermined result.
+has added a bounded E2 resource-observation sidecar and has reproduced it twice through the reviewed
+containment backend. A subsequent experiment version must still predeclare aggregation/tolerance
+before changing the decision. E2 remains the explicit O0/G-S negative/undetermined result.
