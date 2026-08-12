@@ -195,3 +195,27 @@ version must freeze resource aggregation/tolerance before these observations can
 suite, Ruff, strict mypy, schema freshness, and diff checks pass; no E2 implementation or test file
 is changed. Candidate implementation remains blocked until the baseline/oracle pilot and pushed
 benchmark freeze are complete.
+# E3 Confirmatory Review
+
+## Disposition
+
+The E3 v1 one-shot confirmatory run is reviewable as a negative behavioral result with an
+undetermined overall superiority claim. The benchmark and confirmatory protocol were frozen and
+pushed before candidate seed derivation. The raw result retains the complete arm/world/recipient
+matrix and the report is constrained to simulated `G-S` grounding.
+
+## Findings
+
+- **Primary statistics:** candidate did not exceed the strongest eligible baseline; accepted as
+  negative under the frozen rule.
+- **Causal ablation:** targeted-minus-sham margin failed; no causal-use claim is supported.
+- **Leakage/capacity:** development audits passed; no validator-only field appeared in proposer
+  bytes and exact policy capacity exceeded the packet ceiling.
+- **Resources:** hard dimensions are recorded, but host RSS/timing are absent, so an overall
+  superiority claim remains undetermined rather than resource-equivalent.
+- **Independent confirmation:** unavailable; the internal run is not called independent
+  confirmation.
+- **Claim boundary:** no physical, QEC, intelligence, consciousness, or new-physics inference.
+
+All findings are retained in `E3_RESULTS.md` and `E3_EVIDENCE_MATRIX.md`; no frozen scientific
+decision was rewritten.

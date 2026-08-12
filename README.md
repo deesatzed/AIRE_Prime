@@ -55,7 +55,10 @@ findings, and the experimental roadmap are documented in
 The next simulated research program is specified, but not yet implemented, in
 [E3 Research Question](docs/research/E3_RESEARCH_QUESTION.md) and
 [E3 Causal-Language Research Goal](GOAL_E3_CAUSAL_LANGUAGE.md). E3 preserves the current E2 result
-and freezes a baseline/oracle pilot before candidate development.
+and froze a baseline/oracle pilot before candidate development. E3 v1 completed as a simulated
+negative result: the candidate did not exceed B0, causal and family gates failed, and the overall
+transfer claim remains limited by missing host-resource observations and independent confirmation.
+See [E3 Results](docs/research/E3_RESULTS.md) and the [E3 Evidence Matrix](docs/research/E3_EVIDENCE_MATRIX.md).
 
 ## Command-line usage
 

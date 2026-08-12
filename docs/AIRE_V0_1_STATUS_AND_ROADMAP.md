@@ -191,3 +191,10 @@ related-work audit, procedural-world specification, baseline/resource contract, 
 implementation plan, and autonomous goal are under `docs/research/`,
 `docs/plans/2026-08-11-e3-causal-language.md`, and `GOAL_E3_CAUSAL_LANGUAGE.md`. E3 has not started
 and does not upgrade the E2 result.
+
+E3 v1 has now completed its baseline freeze, candidate/confirmatory freeze, and one-shot simulated
+evaluation. The result is negative against the preregistered primary margin: candidate mean
+`0.1991807726` versus B0 `0.2006727431`, point effect `-0.0014919705`, with failed causal-ablation
+and family gates. The full E3 result and evidence matrix are in
+`docs/research/E3_RESULTS.md` and `docs/research/E3_EVIDENCE_MATRIX.md`; missing host resource
+observations and external confirmation remain explicit limitations.

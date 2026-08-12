@@ -442,3 +442,23 @@ Do not begin Task 8, E1, E2, CLI, provider, physical, or deployment work.
   schema freshness, and `git diff --check`.
 - Next action is to commit and push this freeze, verify the remote head, derive the seed from that
   exact commit, and execute the one-shot confirmatory run. No confirmatory seed has yet been derived.
+
+## 2026-08-11 — E3 one-shot confirmatory result
+
+- Freeze `5ab0dfc` was pushed and verified before seed derivation. Derived seed:
+  `f162263141d8887eec42861fab8070d56e1a66199cddcfe539ffaedc000211ea`, root
+  `17393506703858239614`.
+- One confirmatory run completed from the frozen CLI in
+  `/private/tmp/aire-e3-confirmatory-5ab0dfc`. Report ID is
+  `sha256:38fd545187aaac308215979f6037831aea58dd59e229abf9a7bc4e53c3612f9f`; result ID is
+  `sha256:ac08ab93b90c47e88ec01db7ccd7d36e149862691b043e9163f47c30475b58c4`.
+- All 6,480 arm/world/recipient blocks were retained. Candidate mean was 0.1991807726 versus
+  strongest baseline B0 at 0.2006727431; point effect -0.0014919705 and bootstrap interval
+  approximately [-0.0202854, 0.0050564]. Frozen classification is negative; failed gates are
+  primary-effect-margin, causal-ablation, family-noninferiority, and independent-reproduction.
+- Hard resource counts were observed, but host RSS/timing were absent; therefore the overall
+  superiority decision remains resource-gated/undetermined rather than promoted. No independent
+  external recipient reproduction exists. E3 does not support a transferred effect.
+- Added `docs/research/E3_RESULTS.md` and `docs/research/E3_EVIDENCE_MATRIX.md`. Next action is
+  commit/push the result handoff, then fresh-clone static/test/reproduction checks without altering
+  the frozen decision.
