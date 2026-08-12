@@ -39,7 +39,7 @@ def test_world_has_declared_causal_shape_and_interventions() -> None:
     )
     assert world.public_spec.action_count == 5
     assert world.public_spec.observation_bits == 48
-    assert len(world.episodes) == 16
+    assert len(world.episodes) == 288
     assert all(len(episode.intervention_outcomes) == 5 for episode in world.episodes)
 
 

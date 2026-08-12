@@ -56,6 +56,7 @@ class PublicWorldSpec(FrozenModel):
     action_count: int = Field(default=5, ge=2)
     observation_bits: int = Field(default=48, ge=1)
     episode_horizon: int = Field(default=8, ge=1)
+    episode_count: int = Field(default=288, ge=2)
 
 
 class ValidatorWorldSpec(FrozenModel):
@@ -188,7 +189,7 @@ def generate_world(key: WorldKey) -> E3World:
 
     episodes: list[E3Episode] = []
     optimal_actions: list[int] = []
-    for episode_index in range(16):
+    for episode_index in range(public_spec.episode_count):
         latent = tuple(
             (value + episode_index + index) % 3 for index, value in enumerate(latent_state)
         )
