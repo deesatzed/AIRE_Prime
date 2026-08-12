@@ -4,6 +4,7 @@ from typing import Literal
 import numpy as np
 from pydantic import Field
 
+from aire_prime.core.canonical import content_id
 from aire_prime.core.model import FrozenModel
 
 
@@ -24,6 +25,10 @@ class E3AnalysisResult(FrozenModel):
     maximum_baseline: str | None
     point_effect: float | None
     bootstrap_distribution: tuple[float, ...]
+
+    @property
+    def content_id(self) -> str:
+        return content_id(self)
 
 
 def adaptation_auc(values: tuple[float, ...]) -> float:

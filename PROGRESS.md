@@ -416,3 +416,17 @@ Do not begin Task 8, E1, E2, CLI, provider, physical, or deployment work.
 - Focused E3 verification: 34 tests passed; Ruff and strict mypy passed for the E3 package. Next
   action is to add the closed E3 result manifest and CLI inspection surface before candidate/analysis
   freeze. No confirmatory run has been executed.
+
+## 2026-08-11 — E3 closed runner and CLI surface
+
+- Candidate checkpoint `64bebac` and the pilot-boundary correction `5a82d19` were pushed and
+  remotely verified before the report surface was added.
+- Added complete E3 run manifests containing all candidate/B0--B6/B9, world, and recipient blocks;
+  analysis aggregates only at the preregistered world unit and retains invalid/resource-undetermined
+  evidence. Candidate and oracle remain distinct paths.
+- Added closed `e3_manifest.json`, `e3_result.json`, and `e3_report.json` artifacts plus CLI
+  commands for baseline-only pilot, frozen-commit-gated confirm, and report inspection. Tampered
+  identities or grounding escalation are rejected.
+- Focused verification now passes 38 tests, Ruff, strict mypy (60 source files), schema freshness,
+  and `git diff --check`. The next gate is the candidate/confirmatory protocol freeze; no
+  confirmatory seed or scoring run has been performed.

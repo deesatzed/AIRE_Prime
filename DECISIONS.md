@@ -257,3 +257,17 @@ of freedom after the benchmark freeze.
 **Consequence:** The candidate and its six equal-size transformations are evaluated through the
 reviewed typed recipient boundary. Candidate performance cannot revise E3 benchmark, baseline,
 recipient, metric, or resource decisions; a material change creates E3 v2.
+
+## D-020: Keep E3 result artifacts closed and simulated-only
+
+**Decision:** E3 runner outputs use a small closed manifest linking the run, result, analysis, and
+report identities. CLI inspection verifies these links and accepts only the `G-S` simulated grounding
+ceiling. Confirmatory execution requires an explicit pushed frozen commit and derives its seed from
+that commit.
+
+**Reason:** A result viewer that trusts a summary, allows post-freeze seed selection, or permits
+grounding escalation would turn a deterministic benchmark into an unverifiable claim.
+
+**Consequence:** Pilot and confirmatory artifacts remain inspectable and replayable without changing
+E1/E2 report identities. Host timing/RSS and independent external confirmation remain explicit
+limitations rather than hidden success conditions.

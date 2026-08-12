@@ -15,6 +15,9 @@ from aire_prime.experiments.e1.run import E1Report, run_e1
 from aire_prime.experiments.e1.world import ProceduralWorld
 from aire_prime.experiments.e2.baselines import E2BaselineResult
 from aire_prime.experiments.e2.run import E2Report, run_e2
+from aire_prime.experiments.e3.pilot import run_pilot
+from aire_prime.experiments.e3.report import E3EvidenceManifest, E3Report, write_e3_result
+from aire_prime.experiments.e3.run import derive_confirmatory_seed, run_e3_evaluation
 from aire_prime.measurement.decision import ImprovementDecision
 from aire_prime.objects import CanonicalObject
 from aire_prime.objects.contracts import BridgeContract, EvaluationContract
@@ -90,6 +93,33 @@ def _require_manifest(directory: Path, names: tuple[str, ...]) -> None:
 
 
 def _inspect_directory(directory: Path) -> dict[str, object]:
+    if (directory / "e3_manifest.json").exists():
+        e3_required = ("e3_manifest.json", "e3_result.json", "e3_report.json")
+        _require_manifest(directory, e3_required)
+        manifest_payload = _load_object(directory / e3_required[0])
+        report_payload = _load_object(directory / e3_required[2])
+        manifest_wire = dict(manifest_payload)
+        manifest_wire.pop("content_id", None)
+        report_wire = dict(report_payload)
+        report_wire.pop("content_id", None)
+        manifest = E3EvidenceManifest.model_validate(manifest_wire)
+        _load_object(directory / e3_required[1])
+        e3_report = E3Report.model_validate(report_wire)
+        if manifest_payload.get("content_id") != manifest.content_id:
+            raise InspectionError("E3 manifest content ID mismatch")
+        if e3_report.result_id != manifest.result_id:
+            raise InspectionError("E3 report result link does not resolve")
+        if report_payload.get("content_id") != e3_report.content_id:
+            raise InspectionError("E3 report identity mismatch")
+        if e3_report.grounding != "G-S":
+            raise InspectionError("E3 report exceeds the simulated grounding ceiling")
+        return {
+            "report_id": e3_report.content_id,
+            "classification": e3_report.classification,
+            "grounding": e3_report.grounding,
+            "failed_gates": e3_report.failed_gates,
+            "run_id": manifest.run_id,
+        }
     e1_path = directory / "e1_report.json"
     e2_path = directory / "e2_report.json"
     if e1_path.exists() == e2_path.exists():
@@ -313,6 +343,14 @@ def _parser() -> argparse.ArgumentParser:
     report = commands.add_parser("report")
     show = report.add_subparsers(dest="report_command", required=True).add_parser("show")
     show.add_argument("path", type=Path)
+    e3 = commands.add_parser("e3")
+    e3_commands = e3.add_subparsers(dest="e3_command", required=True)
+    pilot = e3_commands.add_parser("pilot")
+    pilot.add_argument("--seed", type=int, required=True)
+    pilot.add_argument("--output", type=Path, required=True)
+    confirm = e3_commands.add_parser("confirm")
+    confirm.add_argument("--frozen-commit", required=True)
+    confirm.add_argument("--output", type=Path, required=True)
     return parser
 
 
@@ -370,6 +408,41 @@ def run_cli(argv: Sequence[str] | None = None) -> int:
                     "failed_gates": experiment_report.failed_gates,
                 }
             )
+        elif args.command == "e3":
+            if args.e3_command == "pilot":
+                pilot_result = run_pilot(root_seed=args.seed)
+                args.output.mkdir(parents=True, exist_ok=True)
+                (args.output / "pilot_manifest.json").write_text(
+                    json.dumps(
+                        pilot_result.manifest.model_dump(mode="json"),
+                        sort_keys=True,
+                        indent=2,
+                    )
+                    + "\n",
+                    encoding="utf-8",
+                )
+                (args.output / "pilot_result.json").write_text(
+                    json.dumps(pilot_result.model_dump(mode="json"), sort_keys=True, indent=2)
+                    + "\n",
+                    encoding="utf-8",
+                )
+                _print({"pilot_id": pilot_result.content_id})
+            else:
+                seed_hex = derive_confirmatory_seed(args.frozen_commit)
+                root_seed = int(seed_hex[:16], 16)
+                result = run_e3_evaluation(
+                    split="confirmatory",
+                    root_seed=root_seed,
+                    frozen_commit=args.frozen_commit,
+                )
+                report = write_e3_result(result, args.output, analyze=True)
+                _print(
+                    {
+                        "report_id": report.content_id,
+                        "classification": report.classification,
+                        "failed_gates": report.failed_gates,
+                    }
+                )
         else:
             if args.path.is_dir():
                 _print(_inspect_directory(args.path))
