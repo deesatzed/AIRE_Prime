@@ -38,14 +38,8 @@ def test_pilot_produces_complete_world_recipient_arm_matrix_and_variance() -> No
 def test_pilot_cannot_run_confirmatory_split_or_candidate_artifact() -> None:
     result = run_pilot(root_seed=301)
     assert result.manifest.split == "development"
-    candidate_path = (
-        Path(__file__).parents[3]
-        / "aire_prime"
-        / "experiments"
-        / "e3"
-        / "candidate.py"
-    )
-    assert not candidate_path.exists()
+    assert result.manifest.candidate_access is False
+    assert "candidate" not in result.manifest.arm_ids
 
 
 def test_pilot_module_writes_a_replayable_result(tmp_path: Path) -> None:
