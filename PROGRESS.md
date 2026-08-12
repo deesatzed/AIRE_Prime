@@ -378,3 +378,23 @@ Do not begin Task 8, E1, E2, CLI, provider, physical, or deployment work.
 - Fresh planning-checkpoint verification: complete suite 300 passed; Ruff passed; strict mypy
   passed for 48 source files; schema freshness and `git diff --check` passed. E2 implementation and
   tests are outside the changed-file set.
+
+## 2026-08-11 — E3 world, metrics, recipients, and baseline pilot
+
+- Created branch `research/e3-causal-language` from the pushed AIRE feature checkpoint and preserved
+  the E2 report identity and package unchanged.
+- Implemented deterministic six-family worlds with 288 episodes (32 calibration plus 256 scored),
+  proposer/validator projections, packet capacity and leakage audits, and world-level adaptation
+  analysis. The focused E3 suite now passes 22 tests before the pilot additions.
+- Added typed 2,048-byte baseline packets, four independently seeded recipient families, explicit
+  hard-budget/resource vectors, B0--B6 and B9 adapters, and reviewed incompatibility records for
+  B7/B8. The recipient adapter rejects unregistered arms, malformed packets, extra calibration, and
+  validator-only oracle use outside the explicit headroom path.
+- Baseline/oracle-only development pilot seed `301` completed 192 valid blocks (6 worlds x 8 arms x
+  4 recipients). Result ID is
+  `sha256:9d13a8a2748279fcc762474699ee36a5b5846d86c5b504b952cf830491ac0d58`; source exact-policy
+  lower bound is 366,337 bytes; capacity and leakage audits passed; oracle headroom is 0.33203125;
+  world-level baseline diagnostic variance is 0.0008625865252920828.
+- Committed and pushed recipient/baseline checkpoint `09d48e3`. The pilot and benchmark-freeze
+  documents are staged for the next irreversible checkpoint. No candidate file exists and no
+  confirmatory seed has been derived.

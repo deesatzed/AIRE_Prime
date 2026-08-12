@@ -1,6 +1,7 @@
 # E3 Preregistration Contract
 
-**Status:** Protocol draft; not yet frozen for a confirmatory run
+**Status:** Benchmark and baseline frontier frozen; candidate and confirmatory protocol remain open
+until the candidate-freeze checkpoint
 
 **Experiment:** Intervention-Discovered Causal Languages for Cross-Agent Transfer
 

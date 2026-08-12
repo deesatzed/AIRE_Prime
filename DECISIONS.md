@@ -227,3 +227,18 @@ performance would make a positive result scientifically uninterpretable.
 **Consequence:** E3 has two irreversible checkpoints: benchmark/baseline freeze and confirmatory
 freeze. A material post-freeze scientific change creates a new E3 version and preserves the old
 evidence. Negative and undetermined outcomes are valid terminal research states.
+
+## D-018: Freeze E3 v1 from the baseline-only development pilot
+
+**Decision:** Retain the six-family, 32-calibration/256-evaluation benchmark, 2,048-byte packet
+ceiling, four recipient families, B0--B6 eligible baselines, B9 oracle exclusion, and
+resource-envelope claim type for E3 v1. Record B7 and B8 as reviewed incompatibilities rather than
+silently substituting weaker methods.
+
+**Reason:** The baseline/oracle-only development pilot completed all 192 arm/world/recipient blocks,
+passed proposer leakage and capacity audits, and showed nontrivial oracle headroom. Freezing these
+choices before candidate implementation prevents candidate-driven benchmark selection.
+
+**Consequence:** Candidate implementation may begin only after the benchmark-freeze checkpoint is
+pushed. The pilot is diagnostic evidence, not a confirmatory result, and no confirmatory seed has
+been derived.

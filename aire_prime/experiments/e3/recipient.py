@@ -219,6 +219,43 @@ def run_recipient(
     )
 
 
+def run_oracle_recipient(
+    packet: BaselinePacket,
+    world: E3World,
+    spec: RecipientSpec,
+    *,
+    calibration_episodes: int = E3_HARD_CONTRACT.target_calibration_episodes,
+) -> RecipientExchange:
+    """Run the validator-only headroom adapter; it is never comparison-eligible."""
+    if packet.arm_id != "B9" or packet.algorithm != "oracle":
+        raise ValueError("oracle adapter requires the registered B9 oracle packet")
+    expected_episode_count = (
+        E3_HARD_CONTRACT.target_calibration_episodes
+        + E3_HARD_CONTRACT.evaluation_episodes
+    )
+    if calibration_episodes != E3_HARD_CONTRACT.target_calibration_episodes:
+        raise ValueError("calibration schedule is frozen")
+    if len(world.episodes) != expected_episode_count:
+        raise ValueError("world does not provide the frozen calibration/evaluation schedule")
+    predictions = world.validator_spec.optimal_actions[calibration_episodes:]
+    return RecipientExchange(
+        recipient_id=spec.recipient_id,
+        packet_arm_id=packet.arm_id,
+        packet_content_id=packet.content_id,
+        target_world_id=world.content_id,
+        calibration_episode_count=calibration_episodes,
+        predicted_actions=predictions,
+        contained=True,
+        observation_access="validator-only-v1",
+        resources=ResourceVector(
+            packet_bytes=ResourceMeasurement.observed(float(packet.packet_bytes)),
+            interaction_count=ResourceMeasurement.observed(float(len(world.episodes))),
+            operation_count=ResourceMeasurement.observed(float(len(predictions))),
+            external_calls=ResourceMeasurement.observed(0.0),
+        ),
+    )
+
+
 def evaluate_exchange(world: E3World, exchange: RecipientExchange) -> BaselineScore:
     expected = world.validator_spec.optimal_actions[E3_HARD_CONTRACT.target_calibration_episodes :]
     valid = (
