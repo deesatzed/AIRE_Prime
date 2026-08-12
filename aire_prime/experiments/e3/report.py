@@ -100,8 +100,11 @@ def write_e3_result(result: E3RunResult, output: Path, *, analyze: bool = False)
     analysis = None
     if analyze:
         blocks = blocks_for_analysis(result)
+        bootstrap_replicates = 100_000 if result.manifest.split == "confirmatory" else 128
         analysis = analyze_confirmatory(
-            tuple(blocks), seed=result.manifest.root_seed, bootstrap_replicates=128
+            tuple(blocks),
+            seed=result.manifest.root_seed,
+            bootstrap_replicates=bootstrap_replicates,
         )
     report = classify_run(result, analysis)
     required = ("e3_manifest.json", "e3_result.json", "e3_report.json")

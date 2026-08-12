@@ -430,3 +430,15 @@ Do not begin Task 8, E1, E2, CLI, provider, physical, or deployment work.
 - Focused verification now passes 38 tests, Ruff, strict mypy (60 source files), schema freshness,
   and `git diff --check`. The next gate is the candidate/confirmatory protocol freeze; no
   confirmatory seed or scoring run has been performed.
+
+## 2026-08-11 — E3 confirmatory protocol freeze prepared
+
+- Confirmatory scale is now explicit: 180 worlds, 30 per shift family, with 100,000 world-level
+  bootstrap replicates. Development remains the six-world pilot surface.
+- Added `docs/research/E3_CONFIRMATORY_FREEZE.md` covering frozen identities, arm/recipient/family
+  matrix, resource-envelope claim, retries, exclusions, adversarial review disposition, and the
+  exact commit-bound seed derivation rule.
+- Pre-freeze verification passed 39 focused E3/CLI tests, Ruff, strict mypy (60 source files),
+  schema freshness, and `git diff --check`.
+- Next action is to commit and push this freeze, verify the remote head, derive the seed from that
+  exact commit, and execute the one-shot confirmatory run. No confirmatory seed has yet been derived.

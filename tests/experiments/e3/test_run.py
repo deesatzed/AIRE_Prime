@@ -32,3 +32,18 @@ def test_development_runner_has_complete_candidate_baseline_recipient_matrix() -
 def test_confirmatory_runner_requires_pushed_freeze_commit() -> None:
     with pytest.raises(ValueError, match="frozen commit"):
         run_e3_evaluation(split="confirmatory", root_seed=301)
+
+
+def test_confirmatory_world_count_is_frozen_at_thirty_per_shift_family() -> None:
+    from aire_prime.experiments.e3.run import _target_suite
+
+    suite = _target_suite(root_seed=301, split="confirmatory")
+    assert len(suite.worlds) == 180
+    assert {world.key.family for world in suite.worlds} == {
+        "surface",
+        "nuisance",
+        "parameter",
+        "composition",
+        "topology",
+        "sensor-loss",
+    }

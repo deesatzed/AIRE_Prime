@@ -228,6 +228,20 @@ performance would make a positive result scientifically uninterpretable.
 freeze. A material post-freeze scientific change creates a new E3 version and preserves the old
 evidence. Negative and undetermined outcomes are valid terminal research states.
 
+## D-021: Freeze E3 confirmatory analysis before deriving its seed
+
+**Decision:** Freeze the candidate, runner, 180-world confirmatory scale, 100,000-replicate
+world-level bootstrap, arm/recipient/family matrix, resource-envelope claim, exclusions, retries,
+and `G-S` claim boundary in `E3_CONFIRMATORY_FREEZE.md`. Derive the confirmatory root only from the
+resulting pushed checkpoint.
+
+**Reason:** Candidate outcomes must not influence sample size, endpoint, baseline selection,
+resource interpretation, or random seed. The freeze separates benchmark/pilot evidence from the
+one-shot confirmatory claim.
+
+**Consequence:** After seed derivation, scientific code and protocol are immutable for E3 v1. Any
+correction requires a new experiment version and preserves the original evidence.
+
 ## D-018: Freeze E3 v1 from the baseline-only development pilot
 
 **Decision:** Retain the six-family, 32-calibration/256-evaluation benchmark, 2,048-byte packet

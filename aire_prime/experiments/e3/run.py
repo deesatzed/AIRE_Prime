@@ -20,7 +20,14 @@ from aire_prime.experiments.e3.recipient import (
     run_oracle_recipient,
     run_recipient,
 )
-from aire_prime.experiments.e3.world import E3World, WorldSuite, generate_suite
+from aire_prime.experiments.e3.world import (
+    E3_FAMILY_NAMES,
+    E3World,
+    WorldKey,
+    WorldSuite,
+    generate_suite,
+    generate_world,
+)
 
 E3_ELIGIBLE_ARM_IDS = ("candidate", "B0", "B1", "B2", "B3", "B4", "B5", "B6")
 E3_ALL_ARM_IDS = (*E3_ELIGIBLE_ARM_IDS, "B9")
@@ -86,6 +93,22 @@ def _candidate_packet(source: WorldSuite) -> CausalProgramPacket:
     return discover_causal_program(tuple(world.proposer_view() for world in source.worlds))
 
 
+def _target_suite(*, root_seed: int, split: Literal["development", "confirmatory"]) -> WorldSuite:
+    if split == "development":
+        return generate_suite(root_seed=root_seed, split=split)
+    worlds = tuple(
+        generate_world(
+            WorldKey(
+                family=family,  # type: ignore[arg-type]
+                seed=root_seed + family_index * 1_000_003 + world_index * 9_973,
+            )
+        )
+        for family_index, family in enumerate(E3_FAMILY_NAMES)
+        for world_index in range(30)
+    )
+    return WorldSuite(root_seed=root_seed, split="confirmatory", worlds=worlds)
+
+
 def _score_exchange(world: E3World, exchange: RecipientExchange) -> BaselineScore:
     return evaluate_exchange(world, exchange)
 
@@ -99,7 +122,7 @@ def run_e3_evaluation(
     if split == "confirmatory" and not frozen_commit:
         raise ValueError("confirmatory evaluation requires a pushed frozen commit")
     source = generate_suite(root_seed=root_seed, split="source")
-    targets = generate_suite(root_seed=root_seed, split=split)
+    targets = _target_suite(root_seed=root_seed, split=split)
     candidate = _candidate_packet(source)
     packets = build_baseline_packets(source, seed=root_seed)
     specs = _recipient_specs(root_seed)
