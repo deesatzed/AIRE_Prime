@@ -242,3 +242,18 @@ choices before candidate implementation prevents candidate-driven benchmark sele
 **Consequence:** Candidate implementation may begin only after the benchmark-freeze checkpoint is
 pushed. The pilot is diagnostic evidence, not a confirmatory result, and no confirmatory seed has
 been derived.
+
+## D-019: Use one sparse typed causal-program candidate for E3 v1
+
+**Decision:** The E3 candidate is a deterministic sparse typed packet containing bounded mechanism
+records, dependency edges, target alignment integers, and source-intervention provenance. It uses
+only the reviewed operator allow-list and the same 2,048-byte packet, calibration, interaction, and
+zero-external-call contract as the baselines.
+
+**Reason:** A single small candidate tests the causal-program hypothesis without introducing model
+scale, unrestricted code, weights, imports, target identifiers, or validator fields as new degrees
+of freedom after the benchmark freeze.
+
+**Consequence:** The candidate and its six equal-size transformations are evaluated through the
+reviewed typed recipient boundary. Candidate performance cannot revise E3 benchmark, baseline,
+recipient, metric, or resource decisions; a material change creates E3 v2.

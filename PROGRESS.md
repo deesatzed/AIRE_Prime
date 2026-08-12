@@ -398,3 +398,21 @@ Do not begin Task 8, E1, E2, CLI, provider, physical, or deployment work.
 - Committed and pushed recipient/baseline checkpoint `09d48e3`. The pilot and benchmark-freeze
   documents are staged for the next irreversible checkpoint. No candidate file exists and no
   confirmatory seed has been derived.
+
+## 2026-08-11 — E3 candidate and ablation implementation
+
+- Benchmark freeze `1e782b2` was pushed and verified before candidate code was added. The frozen
+  world, baseline, recipient, metric, and resource contracts remain unchanged.
+- Added one sparse typed causal-program candidate with bounded mechanism records, alignment, source
+  provenance, deterministic packet identity, and exact 2,048-byte padding. Validator-only fields,
+  arbitrary code, weights, paths, imports, target IDs, and unregistered operators are rejected or
+  absent by construction.
+- Added six equal-size transformations: three targeted causal changes, two shams, and one
+  wrong-object family control. Each records its source packet ID, changed fields, targeted flag,
+  and distinct packet identity.
+- Added development/confirmatory runner contracts with complete candidate/B0--B6/B9 and four-
+  recipient matrices. Confirmatory seed derivation requires an explicit frozen commit and is not
+  available from the development path.
+- Focused E3 verification: 34 tests passed; Ruff and strict mypy passed for the E3 package. Next
+  action is to add the closed E3 result manifest and CLI inspection surface before candidate/analysis
+  freeze. No confirmatory run has been executed.
